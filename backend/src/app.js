@@ -35,6 +35,7 @@ router.get('/', function(req, res) {
     res.json({message: 'API Initialized!'});
 });
 
+///
 router.route('/upload').post(upload.single('data'), function (req, res) {
     fs.rename(UPLOAD_PATH+req.file.filename, UPLOAD_PATH+req.file.originalname, function(err){
         if (err) return res.status(500).send("Problem in POST\n");

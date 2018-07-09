@@ -2,9 +2,11 @@
 
 # Connect to server
 #sudo ssh -i ~/.ssh/Oregon.pem ubuntu@35.155.194.92
-sudo ssh -i ./keys/aws-london.pen ubuntu@35.178.58.44 #Connetti a london
+ssh -i ./keys/aws-london.pem ubuntu@35.178.58.44 #Connetti a london
+echo connesso a 35.178.58.44
 # Download
-git clone -b dev https://github.com/danipisca07/Modeling4Cloud.git
+git clone -b dev https://github.com/danipisca07/Modeling4Cloud-dev.git
+echo git clone OK
 
 # Transfer every ping to local
 #sudo scp -r -i ~/.ssh/Oregon.pem ubuntu@35.155.194.92:~/Modeling4Cloud/uploads .
@@ -24,7 +26,8 @@ git clone -b dev https://github.com/danipisca07/Modeling4Cloud.git
 #tmux
 # Run registerPingCsv from london to paris
 #./registerPingCsv.sh AWS us-west-2a us-west-2a 54.71.162.201 1
-../registerPingCsv.sh AWS us-west-2a us-west-3c 35.180.31.118 1
+echo start pinging
+~/Modeling4Cloud-dev/utils/registerPingCsv.sh AWS us-west-2a us-west-3c 35.180.31.118 1
 
 # Crontab
 #crontab -e #[-l-r] # empty line for crontab

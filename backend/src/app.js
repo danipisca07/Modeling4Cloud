@@ -42,7 +42,7 @@ router.route('/upload').post(upload.single('data'), function (req, res) {
         res.status(200).send("File registered\n");
 
         const { exec } = require('child_process'); // TODO secrets?
-        exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' | mongoimport -h 10.0.0.14:27017 -d pings -c pings -u albertobagnacani -p modeling4cloud --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),icmp_seq.int32\(\),ttl.int32\(\),time.double\(\),timestamp.date\(2006-01-02T15:04:05-00:00\)"', (err, stdout, stderr) => {
+        exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' | mongoimport -h 35.178.58.44:5555 -d pings -c pings -u admin -p admin00 --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),icmp_seq.int32\(\),ttl.int32\(\),time.double\(\),timestamp.date\(2006-01-02T15:04:05-00:00\)"', (err, stdout, stderr) => {
         //        exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' | mongoimport -h 10.0.0.14:27017 -d pings -c pings -u albertobagnacani -p modeling4cloud --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),icmp_seq.int32\(\),ttl.int32\(\),time.double\(\),timestamp.date\(2006-01-02T15:04:05-00:00\)"', (err, stdout, stderr) => {
             if (err) {
                 // TODO

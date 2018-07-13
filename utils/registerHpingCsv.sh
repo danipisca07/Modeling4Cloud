@@ -14,7 +14,7 @@ sudo hping3 -S -p 22 $TOHOST |
 COUNT=0
 
 while read LINE; do
-	echo LINE
+	echo $LINE
     if [ $COUNT != 0 ]
         then
 			#linea: len=44 ip=35.180.31.118 ttl=47 DF id=0 sport=22 flags=SA seq=0 win=26883 rtt=9.4 ms

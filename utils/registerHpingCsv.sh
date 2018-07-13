@@ -20,7 +20,7 @@ while read LINE; do
 			#linea: len=44 ip=35.180.31.118 ttl=47 DF id=0 sport=22 flags=SA seq=0 win=26883 rtt=9.4 ms
             ICMPSEQ=$(echo $LINE | awk '{print $8}' | cut -d= -f2)
             TTL=$(echo $LINE | awk '{print $3}' | cut -d= -f2)
-            TIME=$(echo $LINE | awk '{print $9}' | cut -d= -f2)
+            TIME=$(echo $LINE | awk '{print $10}' | cut -d= -f2)
             TODAY=$(date +%Y-%m-%d)
             TIMESTAMP=$(date "+%Y-%m-%dT%H:%M:%S-00:00")
             FILE=~/csv/$PROVIDER-$NUMBER-$TODAY.csv

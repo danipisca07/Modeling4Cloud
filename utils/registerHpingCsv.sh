@@ -1,7 +1,7 @@
 PROVIDER=$1
 FROMZONE=$2
 TOZONE=$3
-FROMHOST="$(curl ipinfo.io/ip)"
+FROMHOST="$(curl ipinfo.io/ip >> /dev/null)"
 TOHOST=$4
 NUMBER=$5
 

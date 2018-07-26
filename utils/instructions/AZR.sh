@@ -1,7 +1,13 @@
-ssh -i ./keys/gcp ubuntu@40.113.124.89 git clone https://github.com/danipisca07/Modeling4Cloud.git
-
-ssh -i ./keys/gcp ubuntu@40.113.124.89 ~/Modeling4Cloud/utils/registerHpingCsv.sh AZR europa-occ francia-cent 40.89.137.171 1
-
-# Crontab
-#crontab -e #[-l-r] # empty line for crontab
-#0 0 * * * ~/Modeling4Cloud/utils/curlCsv.sh AWS 1 http://35.178.58.44:5555/api/upload
+echo Enable ping from 40.113.125.208 to 40.89.141.170
+ssh -i ./keys/gcp ubuntu@40.113.125.208 bash -c "'
+rm -r -f ~/Modeling4Cloud
+mkdir ~/Modeling4Cloud
+mkdir ~/Modeling4Cloud/utils/
+sudo apt-get install expect -qq
+sudo apt-get install hping3 -qq
+sudo apt-get install git -qq'"
+scp -r -i ./keys/gcp ./setupHping.sh ubuntu@40.113.125.208:~
+scp -r -i ./keys/gcp ../registerHpingCsv.sh ubuntu@40.113.125.208:~/Modeling4Cloud/utils/
+scp -r -i ./keys/gcp ../curlCsv.sh ubuntu@40.113.125.208:~/Modeling4Cloud/utils/
+ssh -i ./keys/gcp ubuntu@40.113.125.208 bash -c "'./setupHping.sh AZR eu-occ fr-cent 40.89.141.170 1 http://137.204.57.136:3100/api/upload '"
+echo COMPLETE

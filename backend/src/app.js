@@ -40,7 +40,7 @@ router.route('/upload').post(upload.single('data'), function (req, res) {
     fs.rename(UPLOAD_PATH+req.file.filename, UPLOAD_PATH+req.file.originalname, function(err){
         if (err) return res.status(500).send("Problem in POST\n");
         res.status(200).send("File registered\n");
-
+        console.log("File uploaded:" + req.file.originalname);
         const { exec } = require('child_process'); // TODO secrets?
         exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' | mongoimport -h localhost:27042 -d pings -c pings --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),icmp_seq.int32\(\),ttl.int32\(\),time.double\(\),timestamp.date\(2006-01-02T15:04:05-00:00\)"', (err, stdout, stderr) => {
         //        exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' | mongoimport -h 10.0.0.14:27017 -d pings -c pings -u albertobagnacani -p modeling4cloud --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),icmp_seq.int32\(\),ttl.int32\(\),time.double\(\),timestamp.date\(2006-01-02T15:04:05-00:00\)"', (err, stdout, stderr) => {
@@ -88,7 +88,7 @@ router.route('/pings/query/avgOfEveryPingOfSelectedDate').get(async (req, res, n
     start = new Date(req.query.start + "T00:00:00-00:00");
     end = new Date(req.query.end + "T23:59:59-00:00");
     sameRegion = parseInt(req.query.sameRegion);
-
+    console.log("avgOfPingsOfDate: start:"+start+";end:"+end+";sameRegion:"+sameRegion);
     Ping.aggregate()
         .project({sameRegion: {$cmp: ['$from_zone', '$to_zone']}, provider: "$provider", time: "$time", timestamp: "$timestamp"})
         .match({$and: [{sameRegion: sameRegion}, {timestamp: {$gte: start, $lte: end}}]})
@@ -109,7 +109,7 @@ router.route('/pings/query/avgOfEveryDayOfSelectedYear').get(async (req, res, ne
     year = parseInt(req.query.year);
     provider = req.query.provider;
     sameRegion = parseInt(req.query.sameRegion);
-
+    console.log("avgOfDayOfYear: year:"+year+";provider:"+provider+";sameRegion:"+sameRegion);
     Ping.aggregate()
         .project({sameRegion: {$cmp: ['$from_zone', '$to_zone']}, provider: "$provider", time: "$time", timestamp: "$timestamp", "year": {"$year":"$timestamp"}, "dayOfYear": { "$dayOfYear": "$timestamp" }})
         .match({$and: [{sameRegion: sameRegion}, {year: year}, {provider: provider}]})
@@ -133,7 +133,7 @@ router.route('/pings/query/threshold').get(async (req, res, next) => { // Thresh
         var threshold = (req.query.threshold) ? ((req.query.field == 'time') ? req.query.threshold / 1000 : req.query.threshold) : 0.5;
         var operator = (req.query.operator) ? req.query.operator : 'lte';
         (req.query.sort) ? sortQuery[field] = req.query.sort : sortQuery[field] = 1;
-
+        console.log("threshold: filed:"+field+";threshold:"+threshold+";operator:"+operator);
         switch(operator){
             case 'lt':
                 query[field] = {$lt : threshold}
@@ -185,7 +185,7 @@ router.route('/pings/query/range').get(async (req, res, next) => {
 
         var field = req.query.field ? req.query.field : 'timestamp';
         var start, end;
-
+        console.log("range: field:"+field);
         switch(field){
             case 'timestamp':
                 start = new Date(req.query.start+"T00:00:00-00:00");

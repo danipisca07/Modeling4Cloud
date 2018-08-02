@@ -1,28 +1,31 @@
-PROVIDER=$1
-FROMZONE=$2
-TOZONE=$3
-TOIP=$4
-SEQ_NUMBER=$5
-BACKEND_ADDR=$6
+CONFIG=$1
+BACKENDADDR=$2
 
-#Download da github
-#rm -r -f ~/Modeling4Cloud 
-#git clone https://github.com/danipisca07/Modeling4Cloud.git
+source $CONFIG
+
+for i in "${pings[@]}"
+do
+	PROVIDER=$(echo $i | awk '{print $1}')
+	KEY=$(echo $i | awk '{print $2}')
+	FROMHOST=$(echo $i | awk '{print $3}')
+	TOHOST=$(echo $i | awk '{print $4}')
+	FROMZONE=$(echo $i | awk '{print $5}')
+	TOZONE=$(echo $i | awk '{print $6}')
+	SEQNUMBER=$(echo $i | awk '{print $7}') #Utilizzare un contatore incrementale?
+	
+	echo "Enable Hping for $PROVIDER from $FROMHOST($FROMZONE) to $TOHOST($TOZONE)"
+	ssh -o StrictHostKeyChecking=no -i $KEY ubuntu@$FROMHOST bash -c "'
+	mkdir -p ~/Modeling4Cloud/utils/
+	sudo apt-get update -qq
+	sudo apt-get install expect -qq
+	sudo apt-get install hping3 -qq
+	sudo apt-get install git -qq'"
+	scp -r -i $KEY ./enableHping.sh ubuntu@$FROMHOST:~
+	scp -r -i $KEY ../registerHpingCsv.sh ubuntu@$FROMHOST:~/Modeling4Cloud/utils/
+	scp -r -i $KEY ../curlCsv.sh ubuntu@$FROMHOST:~/Modeling4Cloud/utils/
+	ssh -i $KEY ubuntu@$FROMHOST bash -c "'./enableHping.sh $PROVIDER $FROMZONE $TOZONE $TOHOST $SEQNUMBER $BACKENDADDR '"
+	echo COMPLETE 
+done
 
 
-#Avvia pinging
-chmod +x ~/Modeling4Cloud/utils/registerHpingCsv.sh #Rende eseguibile lo script per il pinging
-nohup ~/Modeling4Cloud/utils/registerHpingCsv.sh $PROVIDER $FROMZONE $TOZONE $TOIP $SEQ_NUMBER > foo.out 2> foo.err < /dev/null &
-#~/Modeling4Cloud/utils/registerHpingCsv.sh $PROVIDER $FROMZONE $TOZONE $TOIP $SEQ_NUMBER
 
-
-#Schedula lo script per il caricamento al backend dei ping ogni mezzanotte
-cline="0 0 * * * ~/Modeling4Cloud/utils/curlCsv.sh $PROVIDER $SEQ_NUMBER $BACKEND_ADDR"
-chmod +x ~/Modeling4Cloud/utils/curlCsv.sh #Rende eseguibile lo script per il caricamento dei ping eseguiti
-#crontab -r #Rimuove tutti i crontab
-if ! crontab -l | grep -q '~/Modeling4Cloud/utils/curlCsv.sh' ; then
-	(crontab -l ; echo "$cline" ) | crontab - 
-	echo Aggiunto job crontab
-else
-	echo Crontab job già presente
-fi

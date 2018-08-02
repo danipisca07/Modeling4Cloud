@@ -41,3 +41,4 @@ done
 # Ping normale: 68 bytes prima riga, 101 bytes altre righe ~ 6,2KB / min. 8,928 MB / day. ~ 267,840 MB / month ~ 3,214 GB / year
 #Hping: Durata ping TCP = 111ms, Ping ogni secondo, 8 pacchetti ogni ping
 # Hping3(Rete con 1 ping al secondo): 489 byte ogni ping ~ 29340 B/min. | ~1719 KB/hour | ~40 MB/day
+# Hping3(File csv): 7.8 MB/day

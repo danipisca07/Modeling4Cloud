@@ -6,6 +6,7 @@ var fs = require('fs');
 
 var db = require('./db');
 var Ping = require('../models/Ping');
+var BandwidthTest = require('../models/BandwidthTest');
 
 var app = express();
 var router = express.Router();
@@ -53,6 +54,23 @@ router.route('/upload').post(upload.single('data'), function (req, res) {
     });
 });
 
+router.route('/uploadBandwidthTests').post(upload.single('data'), function (req, res) {
+    fs.rename(UPLOAD_PATH+req.file.filename, UPLOAD_PATH+req.file.originalname, function(err){
+        if (err) return res.status(500).send("Problem in POST\n");
+        res.status(200).send("File registered\n");
+        console.log("File uploaded:" + req.file.originalname);
+        const { exec } = require('child_process'); // TODO secrets?
+        exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' | mongoimport -h localhost:27017 -d pings -c bandwidthTests --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),timestamp.date\(2006-01-02T15:04:05-00:00\),bandwidth.double\(\),duration.int32\(\),parallel.int32\(\),transfer.double\(\),retransmissions.int32\(\)"', (err, stdout, stderr) => {
+            //        exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' | mongoimport -h 10.0.0.14:27017 -d pings -c pings -u albertobagnacani -p modeling4cloud --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),icmp_seq.int32\(\),ttl.int32\(\),time.double\(\),timestamp.date\(2006-01-02T15:04:05-00:00\)"', (err, stdout, stderr) => {
+            if (err) {
+                // TODO
+                console.log(err)
+                return;
+            }
+        });
+    });
+});
+
 // TODO
 // check better params;
 // export code in a different file and refactor/improve it?;
@@ -62,6 +80,30 @@ router.route('/pings').get(async function(req, res, next) {
         const [ results, itemCount ] = await Promise.all([
             Ping.find().limit(req.query.limit).skip(req.skip).lean().exec(),
             Ping.find().count({})
+        ]);
+
+        const pageCount = Math.ceil(itemCount / req.query.limit);
+
+        if (req.accepts('json')) {
+            res.json({
+                object: 'list',
+                numberOfItems: results.length,
+                totalNumberOfItems: itemCount,
+                totalNumberOfPages: pageCount,
+                hasMorePages: paginate.hasNextPages(req)(pageCount),
+                data: results
+            });
+        }
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.route('/bandwidthTests').get(async function(req, res, next) {
+    try {
+        const [ results, itemCount ] = await Promise.all([
+            BandwidthTest.find().limit(req.query.limit).skip(req.skip).lean().exec(),
+            BandwidthTest.find().count({})
         ]);
 
         const pageCount = Math.ceil(itemCount / req.query.limit);

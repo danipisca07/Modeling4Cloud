@@ -3,7 +3,7 @@ var mongoosePaginate = require('mongoose-paginate');
 
 let Schema = mongoose.Schema;
 
-var BandwidthTestSchema = new Schema({
+var BandwidthSchema = new Schema({
     provider: String,
     from_zone: String,
     to_zone: String,
@@ -17,6 +17,6 @@ var BandwidthTestSchema = new Schema({
     retransmissions: Number
 }).plugin(mongoosePaginate);
 
-const BandwidthTest = mongoose.model('BandwidthTest', BandwidthTestSchema);
+const Bandwidth = mongoose.model('Bandwidth', BandwidthSchema);
 
-module.exports = BandwidthTest;
+module.exports = Bandwidth;

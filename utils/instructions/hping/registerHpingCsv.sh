@@ -4,12 +4,13 @@ TOZONE=$3
 FROMHOST="$(curl ipinfo.io/ip)"
 TOHOST=$4
 NUMBER=$5
+INTERVAL=10
 
 if [ ! -d ~/csv ]; then
   mkdir ~/csv
 fi
 
-unbuffer sudo hping3 -S -p 22 $TOHOST |
+unbuffer sudo hping3 -S -p 22 -i $INTERVAL $TOHOST |
 (
 COUNT=0
 
@@ -17,7 +18,8 @@ while read LINE; do
 	echo $LINE
     if [ $COUNT != 0 ]
         then
-			#linea: len=44 ip=35.180.31.118 ttl=47 DF id=0 sport=22 flags=SA seq=0 win=26883 rtt=9.4 ms
+			#linea hping: len=44 ip=35.180.31.118 ttl=47 DF id=0 sport=22 flags=SA seq=0 win=26883 rtt=9.4 msmv 
+			#linea csv: AWS,eu-west-2c,eu-west-3c,18.130.223.116,35.180.92.154,247212,48,10.8,2018-07-29T13:31:11-00:00
             ICMPSEQ=$(echo $LINE | awk '{print $8}' | cut -d= -f2)
             TTL=$(echo $LINE | awk '{print $3}' | cut -d= -f2)
             TIME=$(echo $LINE | awk '{print $10}' | cut -d= -f2)

@@ -21,7 +21,7 @@ cline="~/Modeling4Cloud/utils/curlCsv.sh $PROVIDER $SEQ_NUMBER $BACKEND_ADDR"
 chmod +x ~/Modeling4Cloud/utils/curlCsv.sh #Rende eseguibile lo script per il caricamento dei ping eseguiti
 #crontab -r #Rimuove tutti i crontab
 if ! crontab -l | grep -q "$cline" ; then
-	(crontab -l ; echo ' 0 0 * * *' "$cline" ) | crontab - 
+	(crontab -l ; echo '0 0 * * *' "$cline" ) | crontab - 
 	echo Aggiunto job crontab
 else
 	echo Crontab job già presente

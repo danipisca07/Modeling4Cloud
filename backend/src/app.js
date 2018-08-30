@@ -148,6 +148,27 @@ router.route('/pings/query/avgOfEveryPingOfSelectedDate').get(async (req, res, n
         })
 });
 
+router.route('/bandwidths/query/avgOfEveryBWOfSelectedDate').get(async (req, res, next) => {
+    var start, end, sameRegion;
+
+    start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
+    end = new Date(req.query.end + "T23:59:59-00:00");
+    sameRegion = parseInt(req.query.sameRegion); // -1 or 1
+    console.log("avgOfPingsOfDate: start:"+start+";end:"+end+";sameRegion:"+sameRegion);
+    Bandwidth.aggregate()
+        .project({sameRegion: {$cmp: ['$from_zone', '$to_zone']}, provider: "$provider", bandwidth: "$bandwidth", timestamp: "$timestamp"})
+        .match({$and: [{sameRegion: sameRegion}, {timestamp: {$gte: start, $lte: end}}]})
+        .group({_id : "$provider", avg: { $avg: "$bandwidth" }, count: { $sum: 1 }})
+        .exec(function (err, resp) {
+            if (err) {
+                // TODO
+                console.log(err);
+            } else {
+                res.json(resp);
+            }
+        })
+});
+
 router.route('/pings/query/avgOfEveryDayOfSelectedYear').get(async (req, res, next) => {
     var year, provider, sameRegion;
 

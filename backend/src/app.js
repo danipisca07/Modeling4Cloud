@@ -14,6 +14,9 @@ var router = express.Router();
 const UPLOAD_PATH = '../uploads/';
 const upload = multer({ dest: UPLOAD_PATH });
 
+const UPLOADBW_PATH = '../uploadsBW/';
+const uploadBW = multer({ dest: UPLOADBW_PATH });
+
 app.use(paginate.middleware(100, 200));
 
 router.use(bodyParser.urlencoded({extended:true}));
@@ -41,7 +44,7 @@ router.route('/upload').post(upload.single('data'), function (req, res) {
     fs.rename(UPLOAD_PATH+req.file.filename, UPLOAD_PATH+req.file.originalname, function(err){
         if (err) return res.status(500).send("Problem in POST\n");
         res.status(200).send("File registered\n");
-        console.log("File uploaded:" + req.file.originalname);
+        console.log("File uploaded(Ping):" + req.file.originalname);
         const { exec } = require('child_process'); // TODO secrets?
         exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' | mongoimport -h localhost:27017 -d pings -c pings --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),icmp_seq.int32\(\),ttl.int32\(\),time.double\(\),timestamp.date\(2006-01-02T15:04:05-00:00\)"', (err, stdout, stderr) => {
         //        exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' | mongoimport -h 10.0.0.14:27017 -d pings -c pings -u albertobagnacani -p modeling4cloud --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),icmp_seq.int32\(\),ttl.int32\(\),time.double\(\),timestamp.date\(2006-01-02T15:04:05-00:00\)"', (err, stdout, stderr) => {
@@ -54,13 +57,13 @@ router.route('/upload').post(upload.single('data'), function (req, res) {
     });
 });
 
-router.route('/uploadBandwidths').post(upload.single('data'), function (req, res) {
-    fs.rename(UPLOAD_PATH+req.file.filename, UPLOAD_PATH+req.file.originalname, function(err){
+router.route('/uploadBandwidths').post(uploadBW.single('data'), function (req, res) {
+    fs.rename(UPLOADBW_PATH+req.file.filename, UPLOADBW_PATH+req.file.originalname, function(err){
         if (err) return res.status(500).send("Problem in POST\n");
         res.status(200).send("File registered\n");
-        console.log("File uploaded:" + req.file.originalname);
+        console.log("File uploaded(Bandwidth test):" + req.file.originalname);
         const { exec } = require('child_process'); // TODO secrets?
-        exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' | mongoimport -h localhost:27017 -d pings -c bandwidths --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),timestamp.date\(2006-01-02T15:04:05-00:00\),bandwidth.double\(\),duration.int32\(\),parallel.int32\(\),transfer.double\(\),retransmissions.int32\(\)"', (err, stdout, stderr) => {
+        exec('tail -n +2 '+ UPLOADBW_PATH+req.file.originalname +' | sed "/\\b\\(,SA,\\)\\b/d" | mongoimport -h localhost:27017 -d pings -c bandwidths --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),timestamp.date\(2006-01-02T15:04:05-00:00\),bandwidth.double\(\),duration.int32\(\),parallel.int32\(\),transfer.double\(\),retransmissions.int32\(\)"', (err, stdout, stderr) => {
             //        exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' | mongoimport -h 10.0.0.14:27017 -d pings -c pings -u albertobagnacani -p modeling4cloud --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),icmp_seq.int32\(\),ttl.int32\(\),time.double\(\),timestamp.date\(2006-01-02T15:04:05-00:00\)"', (err, stdout, stderr) => {
             if (err) {
                 // TODO
@@ -127,9 +130,9 @@ router.route('/bandwidths').get(async function(req, res, next) {
 router.route('/pings/query/avgOfEveryPingOfSelectedDate').get(async (req, res, next) => {
     var start, end, sameRegion;
 
-    start = new Date(req.query.start + "T00:00:00-00:00");
+    start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
     end = new Date(req.query.end + "T23:59:59-00:00");
-    sameRegion = parseInt(req.query.sameRegion);
+    sameRegion = parseInt(req.query.sameRegion); // -1 or 1
     console.log("avgOfPingsOfDate: start:"+start+";end:"+end+";sameRegion:"+sameRegion);
     Ping.aggregate()
         .project({sameRegion: {$cmp: ['$from_zone', '$to_zone']}, provider: "$provider", time: "$time", timestamp: "$timestamp"})

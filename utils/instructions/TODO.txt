@@ -1,0 +1,2 @@
+Modificare enable di qperf e iperf settando ogni quanti minuti eseguire il register(risposta da foschini?)
+Aggiungere il caricamento dei test di banda al backend(cloud unibo?)

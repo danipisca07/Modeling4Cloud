@@ -5,4 +5,4 @@ pings=("AZR ./keys/azr 40.113.125.208 40.89.141.170 eu-occ fr-cent 1")
 iperfs=("AZR ./keys/azr 40.113.125.208 ./keys/azr 40.89.141.170 eu-occ fr-cent 80 1")
 
 #Provider, source-ssh-keyfile source-ip destination-ssh-keyfile destination-ip source-zone destination-zone connection-port sequence-number
-qperfs=("AZR ./keys/azr 40.113.125.208 ./keys/azr 40.89.141.170 eu-occ fr-cent 8080 1")
+qperfs=("AZR ./keys/azr 40.89.141.170 ./keys/azr 40.113.125.208 fr-cent eu-occ 8080 1")

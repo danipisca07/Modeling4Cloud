@@ -12,7 +12,7 @@ cline="~/Modeling4Cloud/utils/registerIperfCsv.sh $PROVIDER $FROMZONE $TOZONE $T
 chmod +x ~/Modeling4Cloud/utils/registerIperfCsv.sh #Rende eseguibile lo script
 #crontab -r #Rimuove tutti i crontab
 if ! crontab -l | grep -q "$cline" ; then
-	(crontab -l ; echo '0 */2 * * *' "$cline" ) | crontab - #ogni 10 minuti
+	(crontab -l ; echo '0 */6 * * *' "$cline" ) | crontab - #ogni 10 minuti
 	echo Aggiunto job crontab per registerIperfCsv
 else
 	echo Crontab job già presente per registerIperfCsv

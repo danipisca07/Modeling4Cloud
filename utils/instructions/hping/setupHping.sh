@@ -22,7 +22,7 @@ do
 	sudo apt-get install git -qq'"
 	scp -r -i $KEY ./hping/enableHping.sh ubuntu@$FROMHOST:~
 	scp -r -i $KEY ./hping/registerHpingCsv.sh ubuntu@$FROMHOST:~/Modeling4Cloud/utils/
-	scp -r -i $KEY ./hping./curlCsv.sh ubuntu@$FROMHOST:~/Modeling4Cloud/utils/
+	scp -r -i $KEY ./curlCsv.sh ubuntu@$FROMHOST:~/Modeling4Cloud/utils/
 	ssh -i $KEY ubuntu@$FROMHOST bash -c "'./enableHping.sh $PROVIDER $FROMZONE $TOZONE $TOHOST $SEQNUMBER $BACKENDADDR '"
 	echo COMPLETE 
 done

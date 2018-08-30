@@ -26,8 +26,8 @@ do
 		mkdir -p ~/Modeling4Cloud/utils/
 		cd ~/Modeling4Cloud/utils/
 		sudo apt-get install -y make gcc libc-dev -qq
-		wget https://www.openfabrics.org/downloads/qperf/qperf-0.4.9.tar.gz
-		tar xvf qperf-0.4.9.tar.gz
+		wget -q https://www.openfabrics.org/downloads/qperf/qperf-0.4.9.tar.gz
+		tar xf qperf-0.4.9.tar.gz
 		rm -f qperf-0.4.9.tar.gz
 		cd qperf-0.4.9
 		./configure

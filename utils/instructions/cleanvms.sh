@@ -1,0 +1,8 @@
+ssh -i ./keys/aws-imol-london.pem ubuntu@18.130.223.116 bash -c "'crontab -r; sudo reboot'"
+ssh -i ./keys/aws-imol-paris.pem ubuntu@35.180.92.154 bash -c "'crontab -r; sudo reboot'"
+ssh -i ./keys/azr ubuntu@40.113.125.208 bash -c "'crontab -r; sudo reboot'"
+ssh -i ./keys/azr ubuntu@40.89.141.170 bash -c "'crontab -r; sudo reboot'"
+#ssh -i ./keys/gcp ubuntu@35.187.166.139 bash -c "'crontab -r; sudo reboot'"
+#ssh -i ./keys/gcp ubuntu@35.189.69.114 bash -c "'crontab -r; sudo reboot'"
+ssh -i ./keys/ibm ubuntu@159.122.184.179 bash -c "'crontab -r; sudo reboot'"
+ssh -i ./keys/ibm ubuntu@159.8.123.35 bash -c "'crontab -r; sudo reboot'"

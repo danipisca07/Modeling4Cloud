@@ -141,7 +141,7 @@ export default class MyCard extends React.Component {
     handleClick = (event) =>{
         this.callApi()
             .then(res => {
-                var graphType = (this.state.queryNumber == 1) ? 'HorizontalBar' : 'Line';
+                var graphType = (this.state.queryNumber == 1) ? 'Bar' : 'Line';
                 var graphDataModified = (graphType == 'HorizontalBar') ? horizontalBarHelper: lineHelper;
                 let datasetsModified = graphDataModified.datasets;
                 let labelsModified = graphDataModified.labels;

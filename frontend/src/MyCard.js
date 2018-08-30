@@ -169,8 +169,8 @@ export default class MyCard extends React.Component {
 
     async callApi(){ // TODO
         var query = (this.state.queryNumber == 1)
-            ? 'http://137.204.57.136:3100/api/pings/query/avgOfEveryPingOfSelectedDate?start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')+'&sameRegion='+((this.state.sameRegion === true) ? 0 : 1)
-            : 'http://137.204.57.136:3100/api/pings/query/avgOfEveryDayOfSelectedYear?year='+this.state.year+'&sameRegion='+((this.state.sameRegion === true) ? 0 : 1)+'&provider='+this.state.provider;
+            ? 'http://137.204.57.136:3100/api/pings/query/avgOfEveryPingOfSelectedDate?start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')+'&sameRegion='+((this.state.sameRegion === true) ? -1 : 1)
+            : 'http://137.204.57.136:3100/api/pings/query/avgOfEveryDayOfSelectedYear?year='+this.state.year+'&sameRegion='+((this.state.sameRegion === true) ? -1 : 1)+'&provider='+this.state.provider;
         const response = await fetch(query);
         const body = await response.json();
 

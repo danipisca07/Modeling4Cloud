@@ -7,9 +7,11 @@ var fs = require('fs');
 var db = require('./db');
 var Ping = require('../models/Ping');
 var Bandwidth = require('../models/Bandwidth');
+var PingDayAvg = require('../models/PingDayAvg');
 
 var app = express();
 var router = express.Router();
+var readline = require('readline');
 
 const UPLOAD_PATH = '../uploads/';
 const upload = multer({ dest: UPLOAD_PATH });
@@ -53,9 +55,118 @@ router.route('/upload').post(upload.single('data'), function (req, res) {
                 console.log(err)
                 return;
             }
+            else{
+                readFirstLineCSV(UPLOAD_PATH+req.file.originalname);
+            }
         });
     });
 });
+
+router.route('/precomputePings').get(async function(req, res, next) {
+    if(req.query.file == null){
+        precomputeAllPings()
+    }
+    else{
+        readFirstLineCSV(UPLOAD_PATH+req.query.file);
+    }
+
+    if (req.accepts('json')) {
+        res.json({
+            result: "started"
+        });
+    }
+});
+
+function readFirstLineCSV(inputFile) {
+    var lineReader = readline.createInterface({
+        input: fs.createReadStream(inputFile),
+    });
+    var lineCounter = 0;
+    var wantedLine;
+    lineReader.on('line', function (line) {
+        if(lineCounter==1){
+            wantedLine = line;
+            lineReader.close();
+        }
+        lineCounter++;
+    });
+    lineReader.on('close', function() {
+        var fields = wantedLine.split(',');
+        var provider = fields[0];
+        var from_zone = fields[1];
+        var to_zone = fields[2];
+        var date= new Date(fields[8]);
+        precomputePings(provider, from_zone, to_zone, date);
+    });
+}
+
+async function precomputePings(provider, from_zone, to_zone, date) {
+
+    var start = new Date();
+    var end= new Date();
+    start.setDate(date.getDate());
+    start.setHours(0,0,0,0);
+    end.setDate(date.getDate());
+    end.setHours(23,59,59,999);
+    var avg = await Ping.aggregate()
+        .match({
+            $and: [
+                {provider: provider},
+                {from_zone: from_zone},
+                {to_zone: to_zone},
+                {timestamp: {
+                    $gte: start,
+                    $lte: end
+                }}
+            ]
+        })
+        .group({
+            _id: {
+                provider: "$provider",
+                from_zone: "$from_zone",
+                to_zone: "$to_zone",
+                day: {$dateToString: {format: "%Y-%m-%d", date: "$timestamp"}}
+            },
+            avg: {$avg: "$time"},
+            count: {$sum: 1}
+        })
+    console.log(avg);
+    if(avg != null && avg.length != 0)
+        return await updateDayAvg(avg[0]);
+}
+
+async function updateDayAvg(avg){
+    avg._id.day = new Date(avg._id.day+"T00:00:00");
+    var pingDayAvg;
+    var query = await PingDayAvg.find({
+        provider: avg._id.provider,
+        from_zone: avg._id.from_zone,
+        to_zone: avg._id.to_zone,
+        day: avg._id.day
+    });
+    if(query && query.length>0)
+    {
+        pingDayAvg = query[0];
+        pingDayAvg.avg = avg.avg;
+        pingDayAvg.count =avg.count;
+    }
+    else{
+        pingDayAvg = new PingDayAvg({
+            provider : avg._id.provider,
+            from_zone: avg._id.from_zone,
+            to_zone : avg._id.to_zone,
+            day: avg._id.day,
+            avg: avg.avg,
+            count: avg.count
+        });
+    }
+
+    const res = await pingDayAvg.save();
+    return res;
+}
+
+
+
 
 router.route('/uploadBandwidths').post(uploadBW.single('data'), function (req, res) {
     fs.rename(UPLOADBW_PATH+req.file.filename, UPLOADBW_PATH+req.file.originalname, function(err){

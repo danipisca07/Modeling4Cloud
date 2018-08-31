@@ -72,10 +72,38 @@ router.route('/precomputePings').get(async function(req, res, next) {
 
     if (req.accepts('json')) {
         res.json({
-            result: "started"
+            result: "Precomputing started"
         });
     }
 });
+
+function precomputeAllPings(){
+    Ping.aggregate()
+        .group({
+            _id: {
+                provider: "$provider",
+                from_zone: "$from_zone",
+                to_zone: "$to_zone",
+                day: {$dateToString: {format: "%Y-%m-%d", date: "$timestamp"}}
+            },
+            avg: {$avg: "$time"},
+            count: {$sum: 1}
+        })
+        .exec(async function (err,resp) {
+            if (err) {
+                // TODO
+                console.log(err);
+            } else {
+                if(resp && resp.length > 0){
+                    for(var i=0; i<resp.length; i++){
+                        await updateDayAvg(resp[i]);
+                    }
+                }
+            }
+        });
+}
+
+
 
 function readFirstLineCSV(inputFile) {
     var lineReader = readline.createInterface({

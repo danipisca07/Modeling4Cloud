@@ -17,9 +17,9 @@ do
 	ssh -o StrictHostKeyChecking=no -i $KEY ubuntu@$FROMHOST bash -c "'
 	mkdir -p ~/Modeling4Cloud/utils/
 	sudo apt-get update -qq
-	sudo apt-get install expect -qq
-	sudo apt-get install hping3 -qq
-	sudo apt-get install git -qq'"
+	#sudo apt-get install expect -qq
+	#sudo apt-get install hping3 -qq
+	#sudo apt-get install git -qq'"
 	scp -r -i $KEY ./hping/enableHping.sh ubuntu@$FROMHOST:~
 	scp -r -i $KEY ./hping/registerHpingCsv.sh ubuntu@$FROMHOST:~/Modeling4Cloud/utils/
 	scp -r -i $KEY ./curlCsv.sh ubuntu@$FROMHOST:~/Modeling4Cloud/utils/

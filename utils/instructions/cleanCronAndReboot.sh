@@ -1,0 +1,2 @@
+crontab -r
+sudo reboot

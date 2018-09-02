@@ -158,7 +158,7 @@ async function precomputePings(provider, from_zone, to_zone, date) {
             avg: {$avg: "$time"},
             count: {$sum: 1}
         })
-    console.log(avg);
+    console.log("Precompute:" + provider + "-" + from_zone + "-" + to_zone + "-" + date +":\n"+ avg);
     if(avg != null && avg.length != 0)
         return await updateDayAvg(avg[0]);
 }

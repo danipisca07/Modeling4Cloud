@@ -28,7 +28,7 @@ do
 		#sudo apt-get update -qq
 		#sudo apt-get install expect -qq
 		#sudo apt-get install iperf3 -qq
-		nohup sudo iperf3 -s -p $PORT -D > iperfserver.out 2> iperfserver.err < /dev/null &
+		sudo iperf3 -s -p $PORT -D > iperfserver.out 2> iperfserver.err < /dev/null
 	fi'"
 	
 	#SETUP CLIENT

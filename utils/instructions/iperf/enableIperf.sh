@@ -5,14 +5,20 @@ TOIP=$4
 PORT=$5
 SEQ_NUMBER=$6
 BACKEND_ADDR=$7
+HOUR_INTERVAL=$8
 
+if [ ! $HOUR_INTERVAL ]
+	then
+		HOUR_INTERVAL=14
+		echo Executing BW test every $HOUR_INTERVAL hours
+fi
 
 #Schedula lo script per il il test
 cline="~/Modeling4Cloud/utils/registerIperfCsv.sh $PROVIDER $FROMZONE $TOZONE $TOIP $PORT $SEQ_NUMBER > iperf-$FROMZONE-$TOZONE-$SEQ_NUMBER.out 2> iperf-$FROMZONE-$TOZONE-$SEQ_NUMBER.err < /dev/null &"
 chmod +x ~/Modeling4Cloud/utils/registerIperfCsv.sh #Rende eseguibile lo script
 #crontab -r #Rimuove tutti i crontab
 if ! crontab -l | grep -q "$cline" ; then
-	(crontab -l ; echo '0 */40 * * *' "$cline" ) | crontab - #ogni 10 minuti
+	(crontab -l ; echo '0 */'$HOUR_INTERVAL' * * *' "$cline" ) | crontab - #ogni 10 minuti
 	echo Aggiunto job crontab per registerIperfCsv
 else
 	echo Crontab job già presente per registerIperfCsv

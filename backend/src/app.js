@@ -78,6 +78,8 @@ router.route('/precomputePings').get(async function(req, res, next) {
 });
 
 function precomputeAllPings(){
+    console.log("Started precompunting for the whole database")
+    console.time("precomputeAllPings");
     Ping.aggregate()
         .group({
             _id: {
@@ -99,6 +101,7 @@ function precomputeAllPings(){
                         await updateDayAvg(resp[i]);
                     }
                 }
+                console.timeEnd("precomputeAllPings");
             }
         });
 }
@@ -158,7 +161,8 @@ async function precomputePings(provider, from_zone, to_zone, date) {
             avg: {$avg: "$time"},
             count: {$sum: 1}
         })
-    console.log("Precompute:" + provider + "-" + from_zone + "-" + to_zone + "-" + date +":\n"+ avg);
+    console.log("Precompute:" + provider + "/" + from_zone + "/" + to_zone + "/" + date +":");
+    console.log(avg);
     if(avg != null && avg.length != 0)
         return await updateDayAvg(avg[0]);
 }

@@ -28,21 +28,21 @@ do
 		#sudo apt-get update -qq
 		#sudo apt-get install expect -qq
 		#sudo apt-get install iperf3 -qq
-		sudo iperf3 -s -p $PORT -D > iperfserver.out 2> iperfserver.err < /dev/null
+		nohup sudo iperf3 -s -p $PORT -D > iperfserver.out 2> iperfserver.err < /dev/null &
 	fi'"
 	
 	#SETUP CLIENT
 	echo _____ SETUP CLIENT _____
 	ssh -o StrictHostKeyChecking=no -i $KEYFROMHOST ubuntu@$FROMHOST bash -c "'
 	mkdir -p ~/Modeling4Cloud/utils/
-	sudo apt-get update -qq
-	sudo apt-get install expect -qq
-	sudo apt-get install iperf3 -qq'"
+	#sudo apt-get update -qq
+	#sudo apt-get install expect -qq
+	#sudo apt-get install iperf3 -qq'"
 	
 	echo _____ STARTING _____
 	scp -r -i $KEYFROMHOST ./iperf/enableIperf.sh ubuntu@$FROMHOST:~
 	scp -r -i $KEYFROMHOST ./iperf/registerIperfCsv.sh ubuntu@$FROMHOST:~/Modeling4Cloud/utils/
 	scp -r -i $KEYFROMHOST ./curlCsv.sh ubuntu@$FROMHOST:~/Modeling4Cloud/utils/
 	ssh -i $KEYFROMHOST ubuntu@$FROMHOST bash -c "'./enableIperf.sh $PROVIDER $FROMZONE $TOZONE $TOHOST $PORT $SEQNUMBER $BACKENDADDR'"
-	echo _____ COMPLETE _____
+	printf "_____ COMPLETE _____ \n\n\n\n"
 done

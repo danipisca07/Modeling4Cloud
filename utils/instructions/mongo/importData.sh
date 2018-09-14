@@ -1,8 +1,8 @@
 #!/bin/bash
 echo  __________________________ Import ~/backupPings/  __________________________ 
-sudo sed -i '/,,/d' ~/backupPings/*.csv
-sudo sed -i '/,SA,/d' ~/backupPings/*.csv
-tail -n +2 ~/backupPings/*.csv | mongoimport -h localhost:27017 -d pings -c pings --type csv --columnsHaveTypes --fields "provider.string(),from_zone.string(),to_zone.string(),from_host.string(),to_host.string(),icmp_seq.int32(),ttl.int32(),time.double(),timestamp.date(2006-01-02T15:04:05-00:00)"
+#sudo sed -i '/,,/d' ~/backupPings/*.csv
+#sudo sed -i '/,SA,/d' ~/backupPings/*.csv
+#tail -n +2 ~/backupPings/*.csv | mongoimport -h localhost:27017 -d pings -c pings --type csv --columnsHaveTypes --fields "provider.string(),from_zone.string(),to_zone.string(),from_host.string(),to_host.string(),icmp_seq.int32(),ttl.int32(),time.double(),timestamp.date(2006-01-02T15:04:05-00:00)"
 
 echo  __________________________ Import ~/Modeling4Cloud/uploads/  __________________________ 
 #sudo sed -i '/,,/d' ~/Modeling4Cloud/uploads/*.csv

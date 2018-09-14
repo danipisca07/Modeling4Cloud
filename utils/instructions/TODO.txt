@@ -1,2 +1,3 @@
-Modificare enable di qperf e iperf settando ogni quanti minuti eseguire il register(risposta da foschini?)
-Aggiungere il caricamento dei test di banda al backend(cloud unibo?)
+Avendo eliminato il verbose ora non c'è più bisogno di riavvere il server iperf ogni volta?
+i nuovi script di setup hanno funzionato bene? soprattutto quelli di iperf
+

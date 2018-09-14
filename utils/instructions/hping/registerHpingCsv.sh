@@ -1,9 +1,9 @@
 PROVIDER=$1
 FROMZONE=$2
 TOZONE=$3
-FROMHOST="$(curl ipinfo.io/ip)"
-TOHOST=$4
-NUMBER=$5
+FROMHOST=$4
+TOHOST=$5
+NUMBER=$6
 INTERVAL=10
 
 if [ ! -d ~/csv ]; then

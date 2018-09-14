@@ -1,29 +1,14 @@
 PROVIDER=$1
 FROMZONE=$2
 TOZONE=$3
-TOIP=$4
-PORT=$5
-SEQ_NUMBER=$6
-BACKEND_ADDR=$7
-HOUR_INTERVAL=$8
-
-if [ ! $HOUR_INTERVAL ]
-	then
-		HOUR_INTERVAL=14
-		echo Executing BW test every $HOUR_INTERVAL hours
-fi
-
-#Schedula lo script per il il test
-cline="~/Modeling4Cloud/utils/registerIperfCsv.sh $PROVIDER $FROMZONE $TOZONE $TOIP $PORT $SEQ_NUMBER > iperf-$FROMZONE-$TOZONE-$SEQ_NUMBER.out 2> iperf-$FROMZONE-$TOZONE-$SEQ_NUMBER.err < /dev/null &"
-chmod +x ~/Modeling4Cloud/utils/registerIperfCsv.sh #Rende eseguibile lo script
-#crontab -r #Rimuove tutti i crontab
-if ! crontab -l | grep -q "$cline" ; then
-	(crontab -l ; echo '0 */'$HOUR_INTERVAL' * * *' "$cline" ) | crontab - #ogni 10 minuti
-	echo Aggiunto job crontab per registerIperfCsv
-else
-	echo Crontab job già presente per registerIperfCsv
-fi
-
+FROMIP=$4
+TOIP=$5
+PORT=$6
+SEQ_NUMBER=$7
+BACKEND_ADDR=$8
+HOUR_INTERVAL=$9
+DURATION=${10}
+PARALLEL=${11}
 
 #Schedula lo script per il caricamento al backend dei ping ogni mezzanotte
 cline="~/Modeling4Cloud/utils/curlCsv.sh $PROVIDER $SEQ_NUMBER $BACKEND_ADDR ~/csvIperf"
@@ -35,3 +20,9 @@ if ! crontab -l | grep -q "$cline" ; then
 else
 	echo Crontab job già presente per curlCsv
 fi
+
+chmod +x ~/Modeling4Cloud/utils/registerIperfCsv.sh #Rende eseguibile lo script
+
+bash ~/Modeling4Cloud/utils/registerIperfCsv.sh $PROVIDER $FROMZONE $TOZONE $FROMIP $TOIP $PORT $SEQ_NUMBER $HOUR_INTERVAL $DURATION $PARALLEL > iperf-$FROMZONE-$TOZONE-$SEQ_NUMBER.out 2> iperf-$FROMZONE-$TOZONE-$SEQ_NUMBER.err < /dev/null &
+
+

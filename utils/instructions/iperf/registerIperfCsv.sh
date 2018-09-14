@@ -1,47 +1,32 @@
 PROVIDER=$1
 FROMZONE=$2
 TOZONE=$3
-FROMHOST="$(curl ipinfo.io/ip)"
-TOHOST=$4
-PORT=$5 #-p
-NUMBER=$6
-DURATION=$7 #-t
-PARALLEL=$8 #-P
-INTERVAL=$9 #-i
+FROMHOST=$4
+TOHOST=$5
+PORT=$6 #-p
+NUMBER=$7
+HOUR_INTERVAL=$8
+DURATION=$9
+PARALLEL=${10}
 
-if [ ! $PORT ]
-	then
-		PORT=80
-		echo using port $PORT
-fi
-if [ ! $DURATION ]
-	then
-		DURATION=1
-		echo using duration $DURATION sec
-fi
-if [ ! $PARALLEL ]
-	then
-		PARALLEL=1
-		echo using $PARALLEL parallel connection
-fi
-if [ ! $INTERVAL ]
-	then
-		INTERVAL=$DURATION
-		echo using interval $DURATION sec
-fi
+echo Started with params: $PROVIDER $FROMZONE $TOZONE $FROMHOST $TOHOST $PORT $NUMBER $HOUR_INTERVAL $DURATION $PARALLEL
 
 if [ ! -d ~/csvIperf ]; then
   mkdir ~/csvIperf
 fi
 
-LINE=$(sudo iperf3 -c $TOHOST -p $PORT -t $DURATION -P $PARALLEL -i $INTERVAL -V | tail -n 5 | head -1)
+echo "~/Modeling4Cloud/utils/registerIperfCsv.sh $PROVIDER $FROMZONE $TOZONE $FROMHOST $TOHOST $PORT $NUMBER $HOUR_INTERVAL $DURATION $PARALLEL $INTERVAL > iperf-$FROMZONE-$TOZONE-$NUMBER.out 2> iperf-$FROMZONE-$TOZONE-$NUMBER.err < /dev/null" | at now + $HOUR_INTERVAL hour 2> /dev/null
 
-echo $LINE
+RESULT=$(sudo iperf3 -c $TOHOST -p $PORT -t $DURATION -P $PARALLEL -i $DURATION)
+
+SENDER=$(echo "$RESULT" | head -7 | tail -n 1)
+RECEIVER=$(echo "$RESULT" | head -8 | tail -n 1)
+
 TODAY=$(date +%Y-%m-%d)
 TIMESTAMP=$(date "+%Y-%m-%dT%H:%M:%S-00:00")
-BANDWIDTH=$(echo $LINE | awk '{print $7}' | cut -d= -f2)
-TRANSFER=$(echo $LINE | awk '{print $5}' | cut -d= -f2)
-RETRANSMISSIONS=$(echo $LINE | awk '{print $9}' | cut -d= -f2)
+BANDWIDTH=$(echo $RECEIVER | awk '{print $7}' | cut -d= -f2)
+TRANSFER=$(echo $SENDER | awk '{print $5}' | cut -d= -f2)
+RETRANSMISSIONS=$(echo $SENDER | awk '{print $9}' | cut -d= -f2)
 FILE=~/csvIperf/$PROVIDER-$NUMBER-$TODAY.csv
 
 if ! [ -s $FILE ]

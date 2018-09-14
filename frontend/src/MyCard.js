@@ -82,6 +82,7 @@ export default class MyCard extends React.Component {
 
         this.state = {
             queryNumber: 1,
+            dataType: 'pings',
             start: null,
             end: null,
             year: null,
@@ -106,15 +107,30 @@ export default class MyCard extends React.Component {
         this.setState({queryNumber: value, buttonDisabled: true});
     }
 
+    handleDataTypeChange = (event, index, value) => {
+        this.setState({dataType: value, buttonDisabled: true});
+    }
+
     check(){
-        if(this.state.queryNumber == 1) {
-            if (this.state.start && this.state.end) {
-                this.setState({buttonDisabled: false})
+        if(this.state.dataType && this.state.queryNumber){
+            switch(this.state.queryNumber){
+                case 1:
+                    if (this.state.start && this.state.end && this.state.provider) {
+                        this.setState({buttonDisabled: false})
+                    }
+                    break;
+                case 2:
+                    if (this.state.start && this.state.end && this.state.sameRegion) {
+                        this.setState({buttonDisabled: false})
+                    }
+                    break;
+                default:
+                    this.setState({buttonDisabled: true})
+                    break;
             }
-        }else{
-            if (this.state.provider && this.state.year) { // TODO handle input
-                this.setState({buttonDisabled: false})
-            }
+        }
+        else{
+            this.setState({buttonDisabled: true})
         }
     }
 
@@ -141,7 +157,7 @@ export default class MyCard extends React.Component {
     handleClick = (event) =>{
         this.callApi()
             .then(res => {
-                var graphType = (this.state.queryNumber == 1) ? 'Bar' : 'Line';
+                var graphType = 'Bar';
                 var graphDataModified = (graphType == 'HorizontalBar') ? horizontalBarHelper: lineHelper;
                 let datasetsModified = graphDataModified.datasets;
                 let labelsModified = graphDataModified.labels;
@@ -150,11 +166,15 @@ export default class MyCard extends React.Component {
                 labelsModified.length = 0;
 
                 for(let resource of res){
-                    datasetsModified[0].data.push(resource.avg)
-                    if(this.state.queryNumber == 1){
-                        labelsModified.push(resource._id)
-                    } else {
-                        labelsModified.push(resource._id.dayOfYear)
+                    switch(this.state.queryNumber){
+                        case 1:
+                            labelsModified.push(resource.from_zone + "->" + resource.to_zone)
+                            datasetsModified[0].data.push(resource.avg)
+                            break;
+                        case 2:
+                            labelsModified.push(resource.provider + ":" +resource.from_zone + "->" + resource.to_zone)
+                            datasetsModified[0].data.push(resource.avg)
+                            break;
                     }
                 }
 
@@ -167,10 +187,20 @@ export default class MyCard extends React.Component {
             .catch(err => console.log(err))
     }
 
-    async callApi(){ // TODO
-        var query = (this.state.queryNumber == 1)
-            ? 'http://localhost:3100/api/pings/query/avgOfEveryPingOfSelectedDate?start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')+'&sameRegion='+((this.state.sameRegion === true) ? -1 : 1)
-            : 'http://localhost:3100/api/pings/query/avgOfEveryDayOfSelectedYear?year='+this.state.year+'&sameRegion='+((this.state.sameRegion === true) ? -1 : 1)+'&provider='+this.state.provider;
+    async callApi(){
+        var query;
+        switch(this.state.queryNumber){
+            case 1:
+                query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfProviderOfSelectedDate?provider='+this.state.provider+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
+                break;
+            case 2:
+                query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfSelectedDate?sameRegion='+((this.state.sameRegion === true) ? 0 : 1)+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
+            default:
+
+        }
+        //var query = (this.state.queryNumber == 1)
+        //    ? 'http://localhost:3100/api/pings/query/avgOfEveryPingOfSelectedDate?start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')+'&sameRegion='+((this.state.sameRegion === true) ? -1 : 1)
+        //    : 'http://localhost:3100/api/pings/query/avgOfEveryDayOfSelectedYear?year='+this.state.year+'&sameRegion='+((this.state.sameRegion === true) ? -1 : 1)+'&provider='+this.state.provider;
         const response = await fetch(query);
         const body = await response.json();
 
@@ -185,11 +215,11 @@ export default class MyCard extends React.Component {
         switch(this.state.queryNumber){
             case 1:
                 return(
-                    <DatePicker hintText="Select start date" value={this.state.start} onChange={this.handleStartChange}/>
+                    <TextField hintText="Select provider (es: 'AWS')" onChange={this.handleProviderChange}/>
                 )
             case 2:
                 return(
-                    <TextField hintText="Select year (es: 2018)" onChange={this.handleYearChange}/>
+                    <DatePicker hintText="Select start date" value={this.state.start} onChange={this.handleStartChange}/>
                     //<TextField hintText="Es: 2018" floatingLabelText="Insert year"/>
                     //<DatePicker hintText="Select start year" value={this.state.start} onChange={this.handleStartChange}/>
                 )
@@ -209,11 +239,11 @@ export default class MyCard extends React.Component {
         switch(this.state.queryNumber){
             case 1:
                 return(
-                    <DatePicker hintText="Select end date" value={this.state.end} onChange={this.handleEndChange}/>
+                    <DatePicker hintText="Select start date" value={this.state.start} onChange={this.handleStartChange}/>
                 )
             case 2:
                 return(
-                    <TextField hintText="Select provider (es: 'AWS')" onChange={this.handleProviderChange}/>
+                    <DatePicker hintText="Select end date" value={this.state.end} onChange={this.handleEndChange}/>
                     //<TextField hintText="Es: 'AWS'" floatingLabelText="Insert provider"/>
                     //<DatePicker hintText="Select end year" value={this.state.end} onChange={this.handleEndChange}/>
                 )
@@ -225,6 +255,38 @@ export default class MyCard extends React.Component {
                 return(
                     <DatePicker hintText="Select end day" value={this.state.end} onChange={this.handleEndChange}/>
                 )
+        }
+    }
+
+    renderThird(){
+        switch(this.state.queryNumber){
+            case 1:
+                return(
+                    <DatePicker hintText="Select end date" value={this.state.end} onChange={this.handleEndChange}/>
+                )
+            case 2:
+                return(null);
+            case 3:
+                return(
+                    <DatePicker hintText="Select end month" value={this.state.end} onChange={this.handleEndChange}/>
+                )
+            case 4:
+                return(
+                    <DatePicker hintText="Select end day" value={this.state.end} onChange={this.handleEndChange}/>
+                )
+        }
+    }
+
+    renderFourth(){
+        switch(this.state.queryNumber){
+            case 1:
+                return(null)
+            case 2:
+                return(<Toggle label="Same Region" defaultToggled={true} onToggle={this.handleSameRegionChange}/>)
+            case 3:
+                return(null)
+            case 4:
+                return(null)
         }
     }
 
@@ -242,14 +304,24 @@ export default class MyCard extends React.Component {
                             >
                                 <GridTile>
                                     <SelectField
+                                        floatingLabelText="Data"
+                                        value={this.state.dataType}
+                                        onChange={this.handleDataTypeChange}
+                                    >
+                                        <MenuItem value={'pings'} primaryText="Latency" />
+                                        <MenuItem value={'bandwidths'} primaryText="Bandwidth" />
+
+                                    </SelectField>
+                                </GridTile>
+                                <GridTile>
+                                    <SelectField
                                         floatingLabelText="Query"
                                         value={this.state.queryNumber}
                                         onChange={this.handleQueryNumberChange}
                                     >
-                                        <MenuItem value={1} primaryText="Comparison" />
-                                        <MenuItem value={2} primaryText="Year" />
-                                        <MenuItem value={3} primaryText="Month" />
-                                        <MenuItem value={4} primaryText="Day" />
+                                        <MenuItem value={1} primaryText="Provider" />
+                                        <MenuItem value={2} primaryText="Zone" />
+
                                     </SelectField>
                                 </GridTile>
                                 <GridTile>
@@ -259,7 +331,10 @@ export default class MyCard extends React.Component {
                                     {this.renderSecond()}
                                 </GridTile>
                                 <GridTile>
-                                    <Toggle label="Same Region" defaultToggled={true} onToggle={this.handleSameRegionChange}/>
+                                    {this.renderThird()}
+                                </GridTile>
+                                <GridTile>
+                                    {this.renderFourth()}
                                 </GridTile>
                                 {/*<GridTile>
                                     <RadioButtonGroup name="graphType" defaultSelected="Pie" style={{display: 'inline'}} onChange={this.handleRadioButton}>

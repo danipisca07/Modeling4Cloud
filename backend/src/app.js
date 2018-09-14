@@ -348,6 +348,9 @@ router.route('/pings/query/avgOfSelectedDate').get(async (req, res, next) => {
     start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
     end = new Date(req.query.end + "T23:59:59-00:00");
     sameRegion = parseInt(req.query.sameRegion); // -1 or 1
+    if(isNaN(sameRegion)) {
+        sameRegion=0;
+    }
     console.log("avgOfPingsOfDate: start:"+start+";end:"+end+";sameRegion:"+sameRegion);
     PingDayAvg.aggregate()
         .match({$and: [{day: {$gte: start, $lte: end}}]})

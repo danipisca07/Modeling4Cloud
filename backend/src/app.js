@@ -314,7 +314,7 @@ router.route('/pings/query/avgOfEveryPingOfSelectedDate').get(async (req, res, n
             count: {$sum: 1}
         })
         .addFields({
-            sameRegion: {$cmp:["$from_zone", "$to_zone"]}
+            sameRegion: {$cmp:["$_id.from_zone", "$_id.to_zone"]}
         })
         .match({
             sameRegion: sameRegion
@@ -366,7 +366,7 @@ router.route('/pings/query/avgOfSelectedDate').get(async (req, res, next) => {
             count: {$sum: "$count"}
         })
         .addFields({
-            sameRegion: {$cmp:["$from_zone", "$to_zone"]},
+            sameRegion: {$cmp:["$_id.from_zone", "$_id.to_zone"]},
             avg: {$divide: ["$total", "$count"]}
         })
         .match({
@@ -412,7 +412,7 @@ router.route('/pings/query/avgOfSelectedDate').get(async (req, res, next) => {
             count: {$sum: "$count"}
         })
         .addFields({
-            sameRegion: {$cmp:["$from_zone", "$to_zone"]},
+            sameRegion: {$cmp:["$_id.from_zone", "$_id.to_zone"]},
             avg: {$divide: ["$total", "$count"]}
         })
         .match({
@@ -459,7 +459,7 @@ router.route('/pings/query/avgOfZoneOfSelectedDate').get(async (req, res, next) 
             count: {$sum: "$count"}
         })
         .addFields({
-            sameRegion: {$cmp:["$from_zone", "$to_zone"]},
+            sameRegion: {$cmp:["$_id.from_zone", "$_id.to_zone"]},
             avg: {$divide: ["$total", "$count"]}
         })
         .project({
@@ -502,7 +502,7 @@ router.route('/pings/query/avgOfProviderOfSelectedDate').get(async (req, res, ne
             count: {$sum: "$count"}
         })
         .addFields({
-            sameRegion: {$cmp:["$from_zone", "$to_zone"]},
+            sameRegion: {$cmp:["$_id.from_zone", "$_id.to_zone"]},
             avg: {$divide: ["$total", "$count"]}
         })
         .project({
@@ -524,13 +524,13 @@ router.route('/pings/query/avgOfProviderOfSelectedDate').get(async (req, res, ne
         })
 });
 
-router.route('/bandwidths/query/avgOfEveryBWOfSelectedDate').get(async (req, res, next) => {
+router.route('/bandwidths/query/avgOfSelectedDate').get(async (req, res, next) => {
     var start, end, sameRegion;
 
     start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
     end = new Date(req.query.end + "T23:59:59-00:00");
     sameRegion = parseInt(req.query.sameRegion); // -1 or 1
-    console.log("avgOfPingsOfDate: start:"+start+";end:"+end+";sameRegion:"+sameRegion);
+    console.log("avgOfBWOfDate: start:"+start+";end:"+end+";sameRegion:"+sameRegion);
     Bandwidth.aggregate()
         .project({sameRegion: {$cmp: ['$from_zone', '$to_zone']}, provider: "$provider", from_zone:"$from_zone", to_zone:"$to_zone", bandwidth: "$bandwidth", timestamp: "$timestamp"})
         .match({$and: [{sameRegion: sameRegion}, {timestamp: {$gte: start, $lte: end}}]})

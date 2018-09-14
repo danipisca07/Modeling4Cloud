@@ -19,14 +19,22 @@ echo "~/Modeling4Cloud/utils/registerIperfCsv.sh $PROVIDER $FROMZONE $TOZONE $FR
 
 RESULT=$(sudo iperf3 -c $TOHOST -p $PORT -t $DURATION -P $PARALLEL -i $DURATION)
 
-SENDER=$(echo "$RESULT" | head -7 | tail -n 1)
-RECEIVER=$(echo "$RESULT" | head -8 | tail -n 1)
+SENDER=$(echo "$RESULT" | tail -n 4 | head -1)
+RECEIVER=$(echo "$RESULT" | tail -n 3 | head -1)
 
 TODAY=$(date +%Y-%m-%d)
 TIMESTAMP=$(date "+%Y-%m-%dT%H:%M:%S-00:00")
-BANDWIDTH=$(echo $RECEIVER | awk '{print $7}' | cut -d= -f2)
-TRANSFER=$(echo $SENDER | awk '{print $5}' | cut -d= -f2)
-RETRANSMISSIONS=$(echo $SENDER | awk '{print $9}' | cut -d= -f2)
+
+if [ $PARALLEL -eq 1 ];then
+	BANDWIDTH=$(echo $RECEIVER | awk '{print $7}' | cut -d= -f2)
+	TRANSFER=$(echo $SENDER | awk '{print $5}' | cut -d= -f2)
+	RETRANSMISSIONS=$(echo $SENDER | awk '{print $9}' | cut -d= -f2)
+else
+	BANDWIDTH=$(echo $RECEIVER | awk '{print $6}' | cut -d= -f2)
+	TRANSFER=$(echo $SENDER | awk '{print $4}' | cut -d= -f2)
+	RETRANSMISSIONS=$(echo $SENDER | awk '{print $8}' | cut -d= -f2)
+fi
+
 FILE=~/csvIperf/$PROVIDER-$NUMBER-$TODAY.csv
 
 if ! [ -s $FILE ]

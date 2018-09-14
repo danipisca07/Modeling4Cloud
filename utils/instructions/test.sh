@@ -1,4 +1,6 @@
 #!/bin/bash
-sh ./connectCentos.sh 1 <<END
-pwd
-END
+source ./AWS.sh
+for i in "${iperfs[@]}"
+do
+	echo "$i"
+done

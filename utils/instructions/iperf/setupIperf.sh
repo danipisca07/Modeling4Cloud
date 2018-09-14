@@ -21,27 +21,27 @@ do
 	echo "Enable Iperf for $PROVIDER from $FROMHOST($FROMZONE) to $TOHOST($TOZONE) on port $PORT every $HOUR_INTERVAL hours cfg: $DURATION-$PARALLEL"
 	#SETUP SERVER
 	echo _____ SETUP SERVER _____
-	#scp -r -i $KEYTOHOST ./iperf/serverIperf.sh ubuntu@$TOHOST:~
-	#ssh -i $KEYTOHOST ubuntu@$TOHOST bash -c "'./serverIperf.sh $PORT'"
-	ssh -i $KEYTOHOST ubuntu@$TOHOST bash -c "'
+	scp -r -i $KEYTOHOST ./iperf/serverIperf.sh ubuntu@$TOHOST:~
+	ssh -i $KEYTOHOST ubuntu@$TOHOST bash -c "'./serverIperf.sh $PORT'"
+	#ssh -i $KEYTOHOST ubuntu@$TOHOST bash -c "'
 	#sudo apt-get update -qq
 	#sudo apt-get install expect -qq
 	#sudo apt-get install iperf3 -qq
-	if pgrep -x iperf3 > /dev/null
-	then
-		echo iperf3 server already running
-	else
-		nohup sudo iperf3 -s -p $PORT -D > iperfserver.out 2> iperfserver.err < /dev/null &
-	fi
-	'"
+	#if pgrep -x iperf3 > /dev/null
+	#then
+	#	echo iperf3 server already running
+	#else
+	#	nohup sudo iperf3 -s -p $PORT -D > iperfserver.out 2> iperfserver.err < /dev/null &
+	#fi
+	#'"
 	
 	#SETUP CLIENT
 	echo _____ SETUP CLIENT _____
 	ssh -o StrictHostKeyChecking=no -i $KEYFROMHOST ubuntu@$FROMHOST bash -c "'
 	mkdir -p ~/Modeling4Cloud/utils/
-	#sudo apt-get update -qq
+	sudo apt-get update -qq
 	#sudo apt-get install expect -qq
-	#sudo apt-get install iperf3 -qq'"
+	sudo apt-get install iperf3 -qq'"
 	
 	echo _____ STARTING _____
 	scp -r -i $KEYFROMHOST ./iperf/enableIperf.sh ubuntu@$FROMHOST:~
@@ -49,4 +49,5 @@ do
 	scp -r -i $KEYFROMHOST ./curlCsv.sh ubuntu@$FROMHOST:~/Modeling4Cloud/utils/
 	ssh -i $KEYFROMHOST ubuntu@$FROMHOST bash -c "'./enableIperf.sh $PROVIDER $FROMZONE $TOZONE $FROMHOST $TOHOST $PORT $SEQNUMBER $BACKENDADDR $HOUR_INTERVAL $DURATION $PARALLEL'"
 	printf "_____ COMPLETE _____ \n\n\n\n"
+	sleep 2
 done

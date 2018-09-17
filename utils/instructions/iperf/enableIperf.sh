@@ -16,9 +16,9 @@ chmod +x ~/Modeling4Cloud/utils/curlCsv.sh #Rende eseguibile lo script per il ca
 #crontab -r #Rimuove tutti i crontab
 if ! crontab -l | grep -q "$cline" ; then
 	(crontab -l ; echo '0 0 * * *' "$cline" ) | crontab - 
-	echo Aggiunto job crontab per curlCsv
+	echo Added iperfCurl crontab
 else
-	echo Crontab job già presente per curlCsv
+	echo iperfCurl crontab already setup
 fi
 
 chmod +x ~/Modeling4Cloud/utils/registerIperfCsv.sh #Rende eseguibile lo script

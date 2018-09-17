@@ -43,11 +43,10 @@ do
 	#sudo apt-get install expect -qq
 	sudo apt-get install iperf3 -qq'"
 	
-	echo _____ STARTING _____
 	scp -r -i $KEYFROMHOST ./iperf/enableIperf.sh ubuntu@$FROMHOST:~
 	scp -r -i $KEYFROMHOST ./iperf/registerIperfCsv.sh ubuntu@$FROMHOST:~/Modeling4Cloud/utils/
 	scp -r -i $KEYFROMHOST ./curlCsv.sh ubuntu@$FROMHOST:~/Modeling4Cloud/utils/
 	ssh -i $KEYFROMHOST ubuntu@$FROMHOST bash -c "'./enableIperf.sh $PROVIDER $FROMZONE $TOZONE $FROMHOST $TOHOST $PORT $SEQNUMBER $BACKENDADDR $HOUR_INTERVAL $DURATION $PARALLEL'"
 	printf "_____ COMPLETE _____ \n\n\n\n"
-	sleep 2
+	sleep 2 # Delay to avoid overlap of different bandwidth tests
 done

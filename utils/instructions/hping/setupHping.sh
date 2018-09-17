@@ -12,8 +12,9 @@ do
 	FROMZONE=$(echo $i | awk '{print $5}')
 	TOZONE=$(echo $i | awk '{print $6}')
 	SEQNUMBER=$(echo $i | awk '{print $7}') #Utilizzare un contatore incrementale?
+	PORT=22
 	
-	echo "Setup Hping for $PROVIDER from $FROMHOST($FROMZONE) to $TOHOST($TOZONE)"
+	echo "Setup Hping for $PROVIDER from $FROMHOST($FROMZONE) to $TOHOST($TOZONE) on port $PORT"
 	ssh -o StrictHostKeyChecking=no -i $KEY ubuntu@$FROMHOST bash -c "'
 	mkdir -p ~/Modeling4Cloud/utils/
 	sudo apt-get update -qq
@@ -22,7 +23,7 @@ do
 	scp -r -i $KEY ./hping/enableHping.sh ubuntu@$FROMHOST:~
 	scp -r -i $KEY ./hping/registerHpingCsv.sh ubuntu@$FROMHOST:~/Modeling4Cloud/utils/
 	scp -r -i $KEY ./curlCsv.sh ubuntu@$FROMHOST:~/Modeling4Cloud/utils/
-	ssh -i $KEY ubuntu@$FROMHOST bash -c "'./enableHping.sh $PROVIDER $FROMZONE $TOZONE $FROMHOST $TOHOST $SEQNUMBER $BACKENDADDR '"
+	ssh -i $KEY ubuntu@$FROMHOST bash -c "'./enableHping.sh $PROVIDER $FROMZONE $TOZONE $FROMHOST $TOHOST $SEQNUMBER $PORT $BACKENDADDR '"
 	printf "_____ COMPLETE _____ \n\n\n\n"
 done
 

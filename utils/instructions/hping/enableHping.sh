@@ -4,7 +4,8 @@ TOZONE=$3
 FROMIP=$4
 TOIP=$5
 SEQ_NUMBER=$6
-BACKEND_ADDR=$7
+PORT=$7
+BACKEND_ADDR=$8
 
 #Download da github
 #rm -r -f ~/Modeling4Cloud 
@@ -13,7 +14,7 @@ BACKEND_ADDR=$7
 
 #Avvia pinging
 chmod +x ~/Modeling4Cloud/utils/registerHpingCsv.sh #Rende eseguibile lo script per il pinging
-nohup ~/Modeling4Cloud/utils/registerHpingCsv.sh $PROVIDER $FROMZONE $TOZONE $FROMIP $TOIP $SEQ_NUMBER > $FROMZONE-$TOZONE-$SEQ_NUMBER.out 2> $FROMZONE-$TOZONE-$SEQ_NUMBER.err < /dev/null &
+nohup ~/Modeling4Cloud/utils/registerHpingCsv.sh $PROVIDER $FROMZONE $TOZONE $FROMIP $TOIP $SEQ_NUMBER $PORT > $FROMZONE-$TOZONE-$SEQ_NUMBER.out 2> $FROMZONE-$TOZONE-$SEQ_NUMBER.err < /dev/null &
 #~/Modeling4Cloud/utils/registerHpingCsv.sh $PROVIDER $FROMZONE $TOZONE $TOIP $SEQ_NUMBER
 
 

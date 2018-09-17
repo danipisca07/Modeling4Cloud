@@ -4,13 +4,14 @@ TOZONE=$3
 FROMHOST=$4
 TOHOST=$5
 NUMBER=$6
+PORT=$7
 INTERVAL=10
 
 if [ ! -d ~/csv ]; then
   mkdir ~/csv
 fi
 
-unbuffer sudo hping3 -S -p 22 -i $INTERVAL $TOHOST |
+unbuffer sudo hping3 -S -p $PORT -i $INTERVAL $TOHOST |
 (
 COUNT=0
 

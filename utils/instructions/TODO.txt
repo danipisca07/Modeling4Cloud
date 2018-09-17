@@ -1,3 +1,2 @@
-Avendo eliminato il verbose ora non c'è più bisogno di riavvere il server iperf ogni volta?
-i nuovi script di setup hanno funzionato bene? soprattutto quelli di iperf
-
+sameRegion: $cmp nell'aggregazione mi da -1/1 o 0, come faccio a confrontarlo con il sameRegion del frontend?
+avviato test full scale su AWS il 17-09-2018 alle 18 circa

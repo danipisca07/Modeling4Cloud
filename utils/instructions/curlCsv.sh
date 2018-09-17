@@ -14,3 +14,4 @@ TODAY=$(date +%Y-%m-%d) # Data di oggi in formato yyyy-mm-dd
 FILE=$FOLDER/$PROVIDER-$NUMBER-$YESTERDAY.csv
 
 curl -F "data=@$FILE" $SERVER
+sudo rm -f $FILE

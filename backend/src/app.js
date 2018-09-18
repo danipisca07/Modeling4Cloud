@@ -438,15 +438,19 @@ router.route('/pings/query/avgOfSelectedDate').get(async (req, res, next) => {
 });
 
 router.route('/pings/query/avgOfZoneOfSelectedDate').get(async (req, res, next) => {
-    var start, end, provider, zone;
+    var start, end, provider, from_zone, to_zone;
 
     start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
     end = new Date(req.query.end + "T23:59:59-00:00");
-    zone = req.query.zone;
+    from_zone = req.query.from_zone;
+    to_zone = req.query.to_zone;
+    if(req.query.zone != undefined){
+        from_zone = to_zone = req.query.zone;
+    }
     provider = req.query.provider;
-    console.log("avgOfZoneOfSelectedDate: start:"+start+";end:"+end+";zone:"+zone);
+    console.log("avgOfZoneOfSelectedDate: start:"+start+";end:"+end+";from_zone:"+from_zone+" or to_zone:"+to_zone);
     PingDayAvg.aggregate()
-        .match({$and: [{day: {$gte: start, $lte: end}},{provider: provider}, {from_zone: zone}]})
+        .match({$and: [{day: {$gte: start, $lte: end}},{provider: provider}, {$or: [{from_zone: from_zone}, {to_zone: to_zone}]}]})
         .project({provider: "$provider", from_zone:"$from_zone", to_zone:"$to_zone",
             count: "$count", weight: {$multiply: ["$avg","$count"]} })
         .group({

@@ -1,2 +1,2 @@
-sameRegion: $cmp nell'aggregazione mi da -1/1 o 0, come faccio a confrontarlo con il sameRegion del frontend?
 avviato test full scale su AWS il 17-09-2018 alle 18 circa
+Aggiungere una query per il confronto dei vari provider(media di tutti i datacenter indistintamente, magari con sameregion)

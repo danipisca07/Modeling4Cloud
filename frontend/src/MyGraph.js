@@ -14,8 +14,9 @@ const spec = {
             }],
             xAxes:[{
                 ticks: {
-                    beginAtZero: true
-                }
+                    beginAtZero: true,
+                    autoSkip: false
+                },
             }]
         }
     },

@@ -87,6 +87,7 @@ export default class MyCard extends React.Component {
             end: null,
             year: null,
             provider: null,
+            zone: null,
             sameRegion: true,
             buttonDisabled: true,
             buttonClicked: false,
@@ -103,6 +104,10 @@ export default class MyCard extends React.Component {
         this.setState({provider: value}, this.check);
     }
 
+    handleZoneChange = (event, value) => {
+        this.setState({zone: value}, this.check);
+    }
+
     handleQueryNumberChange = (event, index, value) => {
         this.setState({queryNumber: value, buttonDisabled: true});
     }
@@ -112,15 +117,21 @@ export default class MyCard extends React.Component {
     }
 
     check(){
-        if(this.state.dataType && this.state.queryNumber){
+        console.log(this.state.dataType + "-" + this.state.queryNumber + "-" + this.state.start + "-" + this.state.end + "-" + this.state.sameRegion)
+        if(this.state.dataType && this.state.queryNumber && this.state.start && this.state.end){
             switch(this.state.queryNumber){
                 case 1:
-                    if (this.state.start && this.state.end && this.state.provider) {
+                    if (this.state.provider) {
                         this.setState({buttonDisabled: false})
                     }
                     break;
                 case 2:
-                    if (this.state.start && this.state.end && this.state.sameRegion) {
+                    if (this.state.sameRegion) {
+                        this.setState({buttonDisabled: false})
+                    }
+                    break;
+                case 3:
+                    if (this.state.provider && this.state.zone) {
                         this.setState({buttonDisabled: false})
                     }
                     break;
@@ -150,6 +161,7 @@ export default class MyCard extends React.Component {
         this.setState({sameRegion: isInputChecked});
     }
 
+
     handleRadioButton = (event, value) =>{
         this.setState({graphType: value});
     }
@@ -175,6 +187,10 @@ export default class MyCard extends React.Component {
                             labelsModified.push(resource.provider + ":" +resource.from_zone + "->" + resource.to_zone)
                             datasetsModified[0].data.push(resource.avg)
                             break;
+                        case 3:
+                            labelsModified.push(resource.provider + ":" +resource.from_zone + "->" + resource.to_zone)
+                            datasetsModified[0].data.push(resource.avg)
+                            break;
                     }
                 }
 
@@ -189,12 +205,17 @@ export default class MyCard extends React.Component {
 
     async callApi(){
         var query;
+        console.log(this.state.queryNumber)
         switch(this.state.queryNumber){
             case 1:
                 query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfProviderOfSelectedDate?provider='+this.state.provider+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
                 break;
             case 2:
                 query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfSelectedDate?sameRegion='+((this.state.sameRegion === true) ? 0 : 1)+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
+                break;
+            case 3:
+                query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfZoneOfSelectedDate?provider='+this.state.provider+'&zone='+this.state.zone+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
+                break;
             default:
 
         }
@@ -214,6 +235,7 @@ export default class MyCard extends React.Component {
     renderFirst(){
         switch(this.state.queryNumber){
             case 1:
+            case 3:
                 return(
                     <TextField hintText="Select provider (es: 'AWS')" onChange={this.handleProviderChange}/>
                 )
@@ -238,6 +260,7 @@ export default class MyCard extends React.Component {
     renderSecond(){
         switch(this.state.queryNumber){
             case 1:
+            case 3:
                 return(
                     <DatePicker hintText="Select start date" value={this.state.start} onChange={this.handleStartChange}/>
                 )
@@ -261,11 +284,12 @@ export default class MyCard extends React.Component {
     renderThird(){
         switch(this.state.queryNumber){
             case 1:
+            case 3:
                 return(
                     <DatePicker hintText="Select end date" value={this.state.end} onChange={this.handleEndChange}/>
                 )
             case 2:
-                return(null);
+                return(<Toggle label="Same Region" defaultToggled={true} onToggle={this.handleSameRegionChange}/>)
             case 3:
                 return(
                     <DatePicker hintText="Select end month" value={this.state.end} onChange={this.handleEndChange}/>
@@ -282,9 +306,11 @@ export default class MyCard extends React.Component {
             case 1:
                 return(null)
             case 2:
-                return(<Toggle label="Same Region" defaultToggled={true} onToggle={this.handleSameRegionChange}/>)
-            case 3:
                 return(null)
+            case 3:
+                return(
+                    <TextField hintText="Select zone (es: 'eu-west-1')" onChange={this.handleZoneChange}/>
+                )
             case 4:
                 return(null)
         }
@@ -320,8 +346,8 @@ export default class MyCard extends React.Component {
                                         onChange={this.handleQueryNumberChange}
                                     >
                                         <MenuItem value={1} primaryText="Provider" />
-                                        <MenuItem value={2} primaryText="Zone" />
-
+                                        <MenuItem value={2} primaryText="Zones" />
+                                        <MenuItem value={3} primaryText="Single Zone" />
                                     </SelectField>
                                 </GridTile>
                                 <GridTile>

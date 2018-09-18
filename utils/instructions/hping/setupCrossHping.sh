@@ -5,7 +5,7 @@ source $CONFIG
 
 SEQNUMBER=1
 
-
+echo "Setup hping TCP every $HPING_SECONDS_INTERVAL seconds starting from port $HPINGBASEPORT"
 printf "\n Upload files: \n"
 
 for a in "${vms[@]}"
@@ -41,8 +41,8 @@ do
 		
 		if ! [ "$FROMZONE" = "$TOZONE" ]; then
 			if [ "$HPING_BIDIRECTIONAL" -eq "1" -o "$jCount" -gt "$iCount" ]; then		
-				echo "Setup Hping for $PROVIDER from $FROMHOST($FROMZONE) to $TOHOST($TOZONE) on port $PORT"
-				ssh -i $KEY ubuntu@$FROMHOST bash -c "'./enableHping.sh $PROVIDER $FROMZONE $TOZONE $FROMHOST $TOHOST $SEQNUMBER $PORT $BACKENDADDR '"
+				echo "Setup Hping for $PROVIDER from $FROMHOST($FROMZONE) to $TOHOST($TOZONE) on port $PORT (SEQ_NUMBER:$SEQNUMBER)"
+				ssh -i $KEY ubuntu@$FROMHOST bash -c "'./enableHping.sh $PROVIDER $FROMZONE $TOZONE $FROMHOST $TOHOST $SEQNUMBER $PORT $BACKENDADDR $HPING_SECONDS_INTERVAL'"
 				printf "_____ COMPLETE _____ \n\n\n\n"
 				
 				SEQNUMBER=$(($SEQNUMBER+1))

@@ -5,7 +5,7 @@ source $CONFIG
 
 SEQNUMBER=1
 
-printf  "\n\nIperf settings: Test every $HOUR_INTERVAL hours, for $DURATION seconds, with $PARALLEL parallel connections\n\n"
+printf  "\n\nIperf settings: Test on port $PORT every $IPERF_HOUR_INTERVAL hours, for $DURATION seconds, with $PARALLEL parallel connections\n\n"
 
 printf "\n Upload files: \n"
 for a in "${vms[@]}"
@@ -40,14 +40,14 @@ do
 		TOZONE=$(echo $j | awk '{print $3}')
 		if ! [ "$FROMZONE" = "$TOZONE" ]; then
 			if [ "$IPERF_BIDIRECTIONAL" -eq "1" -o "$jCount" -gt "$iCount" ]; then
-				echo "Enable Iperf for $PROVIDER from $FROMHOST($FROMZONE) to $TOHOST($TOZONE) on port $PORT every $HOUR_INTERVAL hours cfg: $DURATION-$PARALLEL"
+				echo "Enable Iperf for $PROVIDER from $FROMHOST($FROMZONE) to $TOHOST($TOZONE) (SEQ_NUMBER:$SEQNUMBER)"
 				#SETUP SERVER
 				echo _____ SETUP SERVER _____
 				ssh -o StrictHostKeyChecking=no -i $KEYTOHOST ubuntu@$TOHOST bash -c "'./serverIperf.sh $PORT'"
 				
 				#SETUP CLIENT
 				echo _____ SETUP CLIENT _____
-				ssh -i $KEYFROMHOST ubuntu@$FROMHOST bash -c "'./enableIperf.sh $PROVIDER $FROMZONE $TOZONE $FROMHOST $TOHOST $PORT $SEQNUMBER $BACKENDADDR $HOUR_INTERVAL $DURATION $PARALLEL'"
+				ssh -i $KEYFROMHOST ubuntu@$FROMHOST bash -c "'./enableIperf.sh $PROVIDER $FROMZONE $TOZONE $FROMHOST $TOHOST $PORT $SEQNUMBER $BACKENDADDR $IPERF_HOUR_INTERVAL $DURATION $PARALLEL'"
 				printf "_____ COMPLETE _____ \n\n\n\n"
 				
 				sleep $((DURATION*2)) # Delay to avoid overlap of different bandwidth tests

@@ -5,7 +5,12 @@ FROMHOST=$4
 TOHOST=$5
 NUMBER=$6
 PORT=$7
-INTERVAL=10
+INTERVAL=$8
+
+if [ ! $INTERVAL ]
+	then
+		INTERVAL=10
+fi
 
 if [ ! -d ~/csv ]; then
   mkdir ~/csv

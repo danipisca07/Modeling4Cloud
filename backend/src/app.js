@@ -299,7 +299,7 @@ router.route('/pings/query/avgOfEveryPingOfSelectedDate').get(async (req, res, n
 
     start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
     end = new Date(req.query.end + "T23:59:59-00:00");
-    sameRegion = parseInt(req.query.sameRegion); // -1 or 1
+    sameRegion = parseInt(req.query.sameRegion); // 0 or 1
     console.log("avgOfPingsOfDate: start:"+start+";end:"+end+";sameRegion:"+sameRegion);
     Ping.aggregate()
         .match({$and: [{timestamp: {$gte: start, $lte: end}}]})
@@ -314,7 +314,7 @@ router.route('/pings/query/avgOfEveryPingOfSelectedDate').get(async (req, res, n
             count: {$sum: 1}
         })
         .addFields({
-            sameRegion: {$cmp:["$_id.from_zone", "$_id.to_zone"]}
+            sameRegion: {$abs: {$cmp:["$_id.from_zone", "$_id.to_zone"]}}
         })
         .match({
             sameRegion: sameRegion
@@ -347,7 +347,7 @@ router.route('/pings/query/avgOfSelectedDate').get(async (req, res, next) => {
 
     start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
     end = new Date(req.query.end + "T23:59:59-00:00");
-    sameRegion = parseInt(req.query.sameRegion); // -1 or 1
+    sameRegion = parseInt(req.query.sameRegion); // 0 or 1
     if(isNaN(sameRegion)) {
         sameRegion=0;
     }
@@ -366,7 +366,7 @@ router.route('/pings/query/avgOfSelectedDate').get(async (req, res, next) => {
             count: {$sum: "$count"}
         })
         .addFields({
-            sameRegion: {$cmp:["$_id.from_zone", "$_id.to_zone"]},
+            sameRegion: {$abs: {$cmp:["$_id.from_zone", "$_id.to_zone"]}},
             avg: {$divide: ["$total", "$count"]}
         })
         .match({
@@ -396,7 +396,7 @@ router.route('/pings/query/avgOfSelectedDate').get(async (req, res, next) => {
 
     start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
     end = new Date(req.query.end + "T23:59:59-00:00");
-    sameRegion = parseInt(req.query.sameRegion); // -1 or 1
+    sameRegion = parseInt(req.query.sameRegion); // 0 or 1
     console.log("avgOfPingsOfDate: start:"+start+";end:"+end+";sameRegion:"+sameRegion);
     PingDayAvg.aggregate()
         .match({$and: [{day: {$gte: start, $lte: end}}]})
@@ -412,7 +412,7 @@ router.route('/pings/query/avgOfSelectedDate').get(async (req, res, next) => {
             count: {$sum: "$count"}
         })
         .addFields({
-            sameRegion: {$cmp:["$_id.from_zone", "$_id.to_zone"]},
+            sameRegion: {$abs: {$cmp:["$_id.from_zone", "$_id.to_zone"]}},
             avg: {$divide: ["$total", "$count"]}
         })
         .match({
@@ -459,7 +459,7 @@ router.route('/pings/query/avgOfZoneOfSelectedDate').get(async (req, res, next) 
             count: {$sum: "$count"}
         })
         .addFields({
-            sameRegion: {$cmp:["$_id.from_zone", "$_id.to_zone"]},
+            sameRegion: {$abs: {$cmp:["$_id.from_zone", "$_id.to_zone"]}},
             avg: {$divide: ["$total", "$count"]}
         })
         .project({
@@ -502,7 +502,7 @@ router.route('/pings/query/avgOfProviderOfSelectedDate').get(async (req, res, ne
             count: {$sum: "$count"}
         })
         .addFields({
-            sameRegion: {$cmp:["$_id.from_zone", "$_id.to_zone"]},
+            sameRegion: {$abs: {$cmp:["$_id.from_zone", "$_id.to_zone"]}},
             avg: {$divide: ["$total", "$count"]}
         })
         .project({
@@ -529,10 +529,10 @@ router.route('/bandwidths/query/avgOfSelectedDate').get(async (req, res, next) =
 
     start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
     end = new Date(req.query.end + "T23:59:59-00:00");
-    sameRegion = parseInt(req.query.sameRegion); // -1 or 1
+    sameRegion = parseInt(req.query.sameRegion); // 0 or 1
     console.log("avgOfBWOfDate: start:"+start+";end:"+end+";sameRegion:"+sameRegion);
     Bandwidth.aggregate()
-        .project({sameRegion: {$cmp: ['$from_zone', '$to_zone']}, provider: "$provider", from_zone:"$from_zone", to_zone:"$to_zone", bandwidth: "$bandwidth", timestamp: "$timestamp"})
+        .project({sameRegion: {$abs: {$cmp: ['$from_zone', '$to_zone']}}, provider: "$provider", from_zone:"$from_zone", to_zone:"$to_zone", bandwidth: "$bandwidth", timestamp: "$timestamp"})
         .match({$and: [{sameRegion: sameRegion}, {timestamp: {$gte: start, $lte: end}}]})
         .group({_id : {
                 provider: "$provider",
@@ -567,7 +567,7 @@ router.route('/pings/query/avgOfEveryDayOfSelectedYear').get(async (req, res, ne
     sameRegion = parseInt(req.query.sameRegion);
     console.log("avgOfDayOfYear: year:"+year+";provider:"+provider+";sameRegion:"+sameRegion);
     PingDayAvg.aggregate()
-        .addFields({year: {"$year":"$day"}, dayOfYear:{"$dayOfYear":"$day"}, sameRegion: {$cmp:["$from_zone", "$to_zone"]}})
+        .addFields({year: {"$year":"$day"}, dayOfYear:{"$dayOfYear":"$day"}, sameRegion: {$abs: {$cmp:["$from_zone", "$to_zone"]}}})
         .match({$and: [{sameRegion: sameRegion}, {year: year}, {provider: provider}]})
         .sort({"dayOfYear": 1})
         .exec(function (err, resp) {

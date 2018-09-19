@@ -51,6 +51,15 @@ const horizontalBarHelper = {
     ]
 }
 
+function getRandomColor() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
 const lineHelper = {
     labels: [],
     datasets: [{
@@ -88,7 +97,7 @@ export default class MyCard extends React.Component {
             year: null,
             provider: null,
             zone: null,
-            sameRegion: true,
+            crossRegion: true,
             buttonDisabled: true,
             buttonClicked: false,
             graphType: null,
@@ -117,16 +126,14 @@ export default class MyCard extends React.Component {
     }
 
     check(){
-        console.log(this.state.dataType + "-" + this.state.queryNumber + "-" + this.state.start + "-" + this.state.end + "-" + this.state.sameRegion)
+        console.log(this.state.dataType + "-" + this.state.queryNumber + "-" + this.state.start + "-" + this.state.end + "-" + this.state.crossRegion)
         if(this.state.dataType && this.state.queryNumber && this.state.start && this.state.end){
             switch(this.state.queryNumber){
                 case 1:
-                    if (this.state.provider) {
-                        this.setState({buttonDisabled: false})
-                    }
+                    this.setState({buttonDisabled: false})
                     break;
                 case 2:
-                    if (this.state.sameRegion) {
+                    if (this.state.provider) {
                         this.setState({buttonDisabled: false})
                     }
                     break;
@@ -157,8 +164,8 @@ export default class MyCard extends React.Component {
         }, this.check);
     };
 
-    handleSameRegionChange = (event, isInputChecked) =>{
-        this.setState({sameRegion: isInputChecked});
+    handleCrossRegionChange = (event, isInputChecked) =>{
+        this.setState({crossRegion: isInputChecked});
     }
 
 
@@ -169,24 +176,34 @@ export default class MyCard extends React.Component {
     handleClick = (event) =>{
         this.callApi()
             .then(res => {
+
+                res.sort(function(a, b){
+                    var keyA = a.avg,
+                        keyB = b.avg;
+                    // Compare the 2 values
+                    if(keyA < keyB) return -1;
+                    if(keyA > keyB) return 1;
+                    return 0;
+                });
+
                 var graphType = 'Bar';
-                var graphDataModified = (graphType == 'HorizontalBar') ? horizontalBarHelper: lineHelper;
+                var graphDataModified = horizontalBarHelper;
+                //var graphDataModified = lineHelper;
                 let datasetsModified = graphDataModified.datasets;
                 let labelsModified = graphDataModified.labels;
 
                 datasetsModified[0].data.length = 0;
                 labelsModified.length = 0;
 
+
+
                 for(let resource of res){
                     switch(this.state.queryNumber){
                         case 1:
-                            labelsModified.push(resource.from_zone + "->" + resource.to_zone)
+                            labelsModified.push(resource.provider)
                             datasetsModified[0].data.push(resource.avg)
                             break;
                         case 2:
-                            labelsModified.push(resource.provider + ":" +resource.from_zone + "->" + resource.to_zone)
-                            datasetsModified[0].data.push(resource.avg)
-                            break;
                         case 3:
                             labelsModified.push(resource.provider + ":" +resource.from_zone + "->" + resource.to_zone)
                             datasetsModified[0].data.push(resource.avg)
@@ -208,10 +225,10 @@ export default class MyCard extends React.Component {
         console.log(this.state.queryNumber)
         switch(this.state.queryNumber){
             case 1:
-                query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfProviderOfSelectedDate?provider='+this.state.provider+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
+                query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfSelectedDate?crossRegion='+((this.state.crossRegion === true) ? 1 : 0)+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
                 break;
             case 2:
-                query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfSelectedDate?sameRegion='+((this.state.sameRegion === true) ? 0 : 1)+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
+                query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfProviderOfSelectedDate?provider='+this.state.provider+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
                 break;
             case 3:
                 query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfZoneOfSelectedDate?provider='+this.state.provider+'&zone='+this.state.zone+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
@@ -220,8 +237,8 @@ export default class MyCard extends React.Component {
 
         }
         //var query = (this.state.queryNumber == 1)
-        //    ? 'http://localhost:3100/api/pings/query/avgOfEveryPingOfSelectedDate?start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')+'&sameRegion='+((this.state.sameRegion === true) ? -1 : 1)
-        //    : 'http://localhost:3100/api/pings/query/avgOfEveryDayOfSelectedYear?year='+this.state.year+'&sameRegion='+((this.state.sameRegion === true) ? -1 : 1)+'&provider='+this.state.provider;
+        //    ? 'http://localhost:3100/api/pings/query/avgOfEveryPingOfSelectedDate?start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')+'&crossRegion='+((this.state.crossRegion === true) ? -1 : 1)
+        //    : 'http://localhost:3100/api/pings/query/avgOfEveryDayOfSelectedYear?year='+this.state.year+'&crossRegion='+((this.state.crossRegion === true) ? -1 : 1)+'&provider='+this.state.provider;
         const response = await fetch(query);
         const body = await response.json();
 
@@ -235,19 +252,15 @@ export default class MyCard extends React.Component {
     renderFirst(){
         switch(this.state.queryNumber){
             case 1:
-            case 3:
-                return(
-                    <TextField hintText="Select provider (es: 'AWS')" onChange={this.handleProviderChange}/>
-                )
-            case 2:
                 return(
                     <DatePicker hintText="Select start date" value={this.state.start} onChange={this.handleStartChange}/>
                     //<TextField hintText="Es: 2018" floatingLabelText="Insert year"/>
                     //<DatePicker hintText="Select start year" value={this.state.start} onChange={this.handleStartChange}/>
                 )
+            case 2:
             case 3:
                 return(
-                    <DatePicker hintText="Select start month" value={this.state.start} onChange={this.handleStartChange}/>
+                    <TextField hintText="Select provider (es: 'AWS')" onChange={this.handleProviderChange}/>
                 )
             case 4:
                 return(
@@ -260,19 +273,15 @@ export default class MyCard extends React.Component {
     renderSecond(){
         switch(this.state.queryNumber){
             case 1:
-            case 3:
-                return(
-                    <DatePicker hintText="Select start date" value={this.state.start} onChange={this.handleStartChange}/>
-                )
-            case 2:
                 return(
                     <DatePicker hintText="Select end date" value={this.state.end} onChange={this.handleEndChange}/>
                     //<TextField hintText="Es: 'AWS'" floatingLabelText="Insert provider"/>
                     //<DatePicker hintText="Select end year" value={this.state.end} onChange={this.handleEndChange}/>
                 )
+            case 2:
             case 3:
                 return(
-                    <DatePicker hintText="Select end month" value={this.state.end} onChange={this.handleEndChange}/>
+                    <DatePicker hintText="Select start date" value={this.state.start} onChange={this.handleStartChange}/>
                 )
             case 4:
                 return(
@@ -284,15 +293,11 @@ export default class MyCard extends React.Component {
     renderThird(){
         switch(this.state.queryNumber){
             case 1:
+                return(<Toggle label="Cross Region" defaultToggled={true} onToggle={this.handleCrossRegionChange}/>)
+            case 2:
             case 3:
                 return(
                     <DatePicker hintText="Select end date" value={this.state.end} onChange={this.handleEndChange}/>
-                )
-            case 2:
-                return(<Toggle label="Same Region" defaultToggled={true} onToggle={this.handleSameRegionChange}/>)
-            case 3:
-                return(
-                    <DatePicker hintText="Select end month" value={this.state.end} onChange={this.handleEndChange}/>
                 )
             case 4:
                 return(
@@ -345,8 +350,8 @@ export default class MyCard extends React.Component {
                                         value={this.state.queryNumber}
                                         onChange={this.handleQueryNumberChange}
                                     >
-                                        <MenuItem value={1} primaryText="Provider" />
-                                        <MenuItem value={2} primaryText="Zones" />
+                                        <MenuItem value={1} primaryText="Providers" />
+                                        <MenuItem value={2} primaryText="Single Provider" />
                                         <MenuItem value={3} primaryText="Single Zone" />
                                     </SelectField>
                                 </GridTile>

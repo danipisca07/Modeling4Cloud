@@ -62,6 +62,23 @@ router.route('/upload').post(upload.single('data'), function (req, res) {
     });
 });
 
+router.route('/uploadBandwidths').post(uploadBW.single('data'), function (req, res) {
+    fs.rename(UPLOADBW_PATH+req.file.filename, UPLOADBW_PATH+req.file.originalname, function(err){
+        if (err) return res.status(500).send("Problem in POST\n");
+        res.status(200).send("File registered\n");
+        console.log("File uploaded(Bandwidth test):" + req.file.originalname);
+        const { exec } = require('child_process'); // TODO secrets?
+        exec('tail -n +2 '+ UPLOADBW_PATH+req.file.originalname +' |  sed \'/,,/d\' | sed \'/,SA,/d\'  | mongoimport -h localhost:27017 -d pings -c bandwidths --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),timestamp.date\(2006-01-02T15:04:05-00:00\),bandwidth.double\(\),duration.int32\(\),parallel.int32\(\),transfer.double\(\),retransmissions.int32\(\)"', (err, stdout, stderr) => {
+            //        exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' | mongoimport -h 10.0.0.14:27017 -d pings -c pings -u albertobagnacani -p modeling4cloud --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),icmp_seq.int32\(\),ttl.int32\(\),time.double\(\),timestamp.date\(2006-01-02T15:04:05-00:00\)"', (err, stdout, stderr) => {
+            if (err) {
+                // TODO
+                console.log(err)
+                return;
+            }
+        });
+    });
+});
+
 router.route('/precomputePings').get(async function(req, res, next) {
     if(req.query.file == null){
         precomputeAllPings()
@@ -105,8 +122,6 @@ function precomputeAllPings(){
             }
         });
 }
-
-
 
 function readFirstLineCSV(inputFile) {
     var lineReader = readline.createInterface({
@@ -197,30 +212,6 @@ async function updateDayAvg(avg){
     return res;
 }
 
-
-
-
-router.route('/uploadBandwidths').post(uploadBW.single('data'), function (req, res) {
-    fs.rename(UPLOADBW_PATH+req.file.filename, UPLOADBW_PATH+req.file.originalname, function(err){
-        if (err) return res.status(500).send("Problem in POST\n");
-        res.status(200).send("File registered\n");
-        console.log("File uploaded(Bandwidth test):" + req.file.originalname);
-        const { exec } = require('child_process'); // TODO secrets?
-        exec('tail -n +2 '+ UPLOADBW_PATH+req.file.originalname +' |  sed \'/,,/d\' | sed \'/,SA,/d\'  | mongoimport -h localhost:27017 -d pings -c bandwidths --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),timestamp.date\(2006-01-02T15:04:05-00:00\),bandwidth.double\(\),duration.int32\(\),parallel.int32\(\),transfer.double\(\),retransmissions.int32\(\)"', (err, stdout, stderr) => {
-            //        exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' | mongoimport -h 10.0.0.14:27017 -d pings -c pings -u albertobagnacani -p modeling4cloud --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),icmp_seq.int32\(\),ttl.int32\(\),time.double\(\),timestamp.date\(2006-01-02T15:04:05-00:00\)"', (err, stdout, stderr) => {
-            if (err) {
-                // TODO
-                console.log(err)
-                return;
-            }
-        });
-    });
-});
-
-// TODO
-// check better params;
-// export code in a different file and refactor/improve it?;
-// should unify threshold and range?
 router.route('/pings').get(async function(req, res, next) {
     try {
         const [ results, itemCount ] = await Promise.all([
@@ -293,14 +284,15 @@ router.route('/pingsAvg').get(async function(req, res, next) {
     }
 });
 
-// TODO use aggregation everywhere
+//--------------------- QUERY: PING ---------------------------
+
 router.route('/pings/query/avgOfEveryPingOfSelectedDate').get(async (req, res, next) => {
-    var start, end, sameRegion;
+    var start, end, crossRegion;
 
     start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
     end = new Date(req.query.end + "T23:59:59-00:00");
-    sameRegion = parseInt(req.query.sameRegion); // 0 or 1
-    console.log("avgOfPingsOfDate: start:"+start+";end:"+end+";sameRegion:"+sameRegion);
+    crossRegion = parseInt(req.query.crossRegion); // 0 or 1
+    console.log("avgOfPingsOfDate: start:"+start+";end:"+end+";crossRegion:"+crossRegion);
     Ping.aggregate()
         .match({$and: [{timestamp: {$gte: start, $lte: end}}]})
         .project({provider: "$provider", from_zone:"$from_zone", to_zone:"$to_zone", time: "$time"})
@@ -314,10 +306,10 @@ router.route('/pings/query/avgOfEveryPingOfSelectedDate').get(async (req, res, n
             count: {$sum: 1}
         })
         .addFields({
-            sameRegion: {$abs: {$cmp:["$_id.from_zone", "$_id.to_zone"]}}
+            crossRegion: {$abs: {$cmp:["$_id.from_zone", "$_id.to_zone"]}}
         })
         .match({
-            sameRegion: sameRegion
+            crossRegion: crossRegion
         })
         .group({
             _id: {
@@ -343,19 +335,23 @@ router.route('/pings/query/avgOfEveryPingOfSelectedDate').get(async (req, res, n
 });
 
 router.route('/pings/query/avgOfSelectedDate').get(async (req, res, next) => {
-    var start, end, sameRegion;
+    var start, end, crossRegion;
 
     start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
     end = new Date(req.query.end + "T23:59:59-00:00");
-    sameRegion = parseInt(req.query.sameRegion); // 0 or 1
-    if(isNaN(sameRegion)) {
-        sameRegion=0;
-    }
-    console.log("avgOfPingsOfDate: start:"+start+";end:"+end+";sameRegion:"+sameRegion);
+    crossRegion = parseInt(req.query.crossRegion); // 0 or 1
+    console.log("avgOfPingsOfDate: start:"+start+";end:"+end+";crossRegion:"+crossRegion);
     PingDayAvg.aggregate()
         .match({$and: [{day: {$gte: start, $lte: end}}]})
-        .project({provider: "$provider", from_zone:"$from_zone", to_zone:"$to_zone",
-            count: "$count", weight: {$multiply: ["$avg","$count"]} })
+        .project({
+            provider: "$provider", from_zone:"$from_zone", to_zone:"$to_zone",
+            count: "$count",
+            weight: {$multiply: ["$avg","$count"]},
+            crossRegion: {$abs: {$cmp:["$from_zone", "$to_zone"]}}
+        })
+        .match({
+            crossRegion: crossRegion
+        })
         .group({
             _id: {
                 provider: "$provider",
@@ -366,66 +362,20 @@ router.route('/pings/query/avgOfSelectedDate').get(async (req, res, next) => {
             count: {$sum: "$count"}
         })
         .addFields({
-            sameRegion: {$abs: {$cmp:["$_id.from_zone", "$_id.to_zone"]}},
             avg: {$divide: ["$total", "$count"]}
         })
-        .match({
-            sameRegion: sameRegion
-        })
-        .project({
-            "_id": 0,
-            "provider" : "$_id.provider",
-            "from_zone": "$_id.from_zone",
-            "to_zone": "$_id.to_zone",
-            "avg": "$avg",
-            "count": "$count",
-            sameRegion: "$sameRegion"
-        })
-        .exec(function (err, resp) {
-            if (err) {
-                // TODO
-                console.log(err);
-            } else {
-                res.json(resp);
-            }
-        })
-});
-
-router.route('/pings/query/avgOfSelectedDate').get(async (req, res, next) => {
-    var start, end, sameRegion;
-
-    start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
-    end = new Date(req.query.end + "T23:59:59-00:00");
-    sameRegion = parseInt(req.query.sameRegion); // 0 or 1
-    console.log("avgOfPingsOfDate: start:"+start+";end:"+end+";sameRegion:"+sameRegion);
-    PingDayAvg.aggregate()
-        .match({$and: [{day: {$gte: start, $lte: end}}]})
-        .project({provider: "$provider", from_zone:"$from_zone", to_zone:"$to_zone",
-            count: "$count", weight: {$multiply: ["$avg","$count"]} })
         .group({
-            _id: {
-                provider: "$provider",
-                from_zone: "$from_zone",
-                to_zone: "$to_zone"
-            },
-            total: {$sum: "$weight"},
-            count: {$sum: "$count"}
+            _id: "$_id.provider",
+            count: {$sum: "$count"},
+            total: {$sum: {$multiply: ["$avg","$count"]}},
         })
         .addFields({
-            sameRegion: {$abs: {$cmp:["$_id.from_zone", "$_id.to_zone"]}},
             avg: {$divide: ["$total", "$count"]}
         })
-        .match({
-            sameRegion: sameRegion
-        })
         .project({
-            "_id": 0,
-            "provider" : "$_id.provider",
-            "from_zone": "$_id.from_zone",
-            "to_zone": "$_id.to_zone",
-            "avg": "$avg",
-            "count": "$count",
-            sameRegion: "$sameRegion"
+            provider: "$_id",
+            avg: "$avg",
+            "count": "$count"
         })
         .exec(function (err, resp) {
             if (err) {
@@ -463,7 +413,7 @@ router.route('/pings/query/avgOfZoneOfSelectedDate').get(async (req, res, next) 
             count: {$sum: "$count"}
         })
         .addFields({
-            sameRegion: {$abs: {$cmp:["$_id.from_zone", "$_id.to_zone"]}},
+            crossRegion: {$abs: {$cmp:["$_id.from_zone", "$_id.to_zone"]}},
             avg: {$divide: ["$total", "$count"]}
         })
         .project({
@@ -473,7 +423,7 @@ router.route('/pings/query/avgOfZoneOfSelectedDate').get(async (req, res, next) 
             "to_zone": "$_id.to_zone",
             "avg": "$avg",
             "count": "$count",
-            sameRegion: "$sameRegion"
+            crossRegion: "$crossRegion"
         })
         .exec(function (err, resp) {
             if (err) {
@@ -506,7 +456,7 @@ router.route('/pings/query/avgOfProviderOfSelectedDate').get(async (req, res, ne
             count: {$sum: "$count"}
         })
         .addFields({
-            sameRegion: {$abs: {$cmp:["$_id.from_zone", "$_id.to_zone"]}},
+            crossRegion: {$abs: {$cmp:["$_id.from_zone", "$_id.to_zone"]}},
             avg: {$divide: ["$total", "$count"]}
         })
         .project({
@@ -516,64 +466,8 @@ router.route('/pings/query/avgOfProviderOfSelectedDate').get(async (req, res, ne
             "to_zone": "$_id.to_zone",
             "avg": "$avg",
             "count": "$count",
-            sameRegion: "$sameRegion"
+            crossRegion: "$crossRegion"
         })
-        .exec(function (err, resp) {
-            if (err) {
-                // TODO
-                console.log(err);
-            } else {
-                res.json(resp);
-            }
-        })
-});
-
-router.route('/bandwidths/query/avgOfSelectedDate').get(async (req, res, next) => {
-    var start, end, sameRegion;
-
-    start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
-    end = new Date(req.query.end + "T23:59:59-00:00");
-    sameRegion = parseInt(req.query.sameRegion); // 0 or 1
-    console.log("avgOfBWOfDate: start:"+start+";end:"+end+";sameRegion:"+sameRegion);
-    Bandwidth.aggregate()
-        .project({sameRegion: {$abs: {$cmp: ['$from_zone', '$to_zone']}}, provider: "$provider", from_zone:"$from_zone", to_zone:"$to_zone", bandwidth: "$bandwidth", timestamp: "$timestamp"})
-        .match({$and: [{sameRegion: sameRegion}, {timestamp: {$gte: start, $lte: end}}]})
-        .group({_id : {
-                provider: "$provider",
-                from_zone: "$from_zone",
-                to_zone: "$to_zone"
-            },
-            avg: { $avg: "$bandwidth" },
-            count: { $sum: 1 }})
-        .project({
-            _id:0,
-            provider: "$_id.provider",
-            from_zone: "$_id.from_zone",
-            to_zone: "$_id.to_zone",
-            avg: "$avg",
-            count: "$count"
-        })
-        .exec(function (err, resp) {
-            if (err) {
-                // TODO
-                console.log(err);
-            } else {
-                res.json(resp);
-            }
-        })
-});
-
-router.route('/pings/query/avgOfEveryDayOfSelectedYear').get(async (req, res, next) => {
-    var year, provider, sameRegion;
-
-    year = parseInt(req.query.year);
-    provider = req.query.provider;
-    sameRegion = parseInt(req.query.sameRegion);
-    console.log("avgOfDayOfYear: year:"+year+";provider:"+provider+";sameRegion:"+sameRegion);
-    PingDayAvg.aggregate()
-        .addFields({year: {"$year":"$day"}, dayOfYear:{"$dayOfYear":"$day"}, sameRegion: {$abs: {$cmp:["$from_zone", "$to_zone"]}}})
-        .match({$and: [{sameRegion: sameRegion}, {year: year}, {provider: provider}]})
-        .sort({"dayOfYear": 1})
         .exec(function (err, resp) {
             if (err) {
                 // TODO
@@ -746,6 +640,87 @@ router.route('/pings/query/provider').get(async (req, res, next) => {
         next(err);
 
     }
+});
+
+//-------------------- QUERY: BANDWIDTH ------------------------
+
+router.route('/bandwidths/query/avgOfSelectedDate').get(async (req, res, next) => {
+    var start, end, crossRegion;
+
+    start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
+    end = new Date(req.query.end + "T23:59:59-00:00");
+    crossRegion = parseInt(req.query.crossRegion); // 0 or 1
+    console.log("avgOfBWOfDate: start:"+start+";end:"+end+";crossRegion:"+crossRegion);
+    Bandwidth.aggregate()
+        .project({crossRegion: {$abs: {$cmp: ['$from_zone', '$to_zone']}}, provider: "$provider", from_zone:"$from_zone", to_zone:"$to_zone", bandwidth: "$bandwidth", timestamp: "$timestamp"})
+        .match({$and: [{crossRegion: crossRegion}, {timestamp: {$gte: start, $lte: end}}]})
+        .group({_id : {
+                provider: "$provider",
+                from_zone: "$from_zone",
+                to_zone: "$to_zone"
+            },
+            avg: { $avg: "$bandwidth" },
+            count: { $sum: 1 }})
+        .project({
+            _id:0,
+            provider: "$_id.provider",
+            from_zone: "$_id.from_zone",
+            to_zone: "$_id.to_zone",
+            avg: "$avg",
+            count: "$count"
+        })
+        .exec(function (err, resp) {
+            if (err) {
+                // TODO
+                console.log(err);
+            } else {
+                res.json(resp);
+            }
+        })
+});
+
+router.route('/bandwidths/query/avgOfZoneOfSelectedDate').get(async (req, res, next) => {
+    var start, end, provider, from_zone, to_zone;
+
+    start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
+    end = new Date(req.query.end + "T23:59:59-00:00");
+    from_zone = req.query.from_zone;
+    to_zone = req.query.to_zone;
+    if(req.query.zone != undefined){
+        from_zone = to_zone = req.query.zone;
+    }
+    provider = req.query.provider;
+    console.log("avgOfZoneOfSelectedDate: start:"+start+";end:"+end+";from_zone:"+from_zone+" or to_zone:"+to_zone);
+    Bandwidth.aggregate()
+        .match({$and: [{timestamp: {$gte: start, $lte: end}},{provider: provider}, {$or: [{from_zone: from_zone}, {to_zone: to_zone}]}]})
+        .group({
+            _id: {
+                provider: "$provider",
+                from_zone: "$from_zone",
+                to_zone: "$to_zone"
+            },
+            avg: {$avg: "$bandwidth"}
+        })
+        .addFields({
+            crossRegion: {$abs: {$cmp:["$_id.from_zone", "$_id.to_zone"]}},
+        })
+        .project({
+            "_id": 0,
+            "provider" : "$_id.provider",
+            "from_zone": "$_id.from_zone",
+            "to_zone": "$_id.to_zone",
+            "avg": "$avg",
+            "count": "$count",
+            crossRegion: "$crossRegion"
+        })
+        .exec(function (err, resp) {
+            if (err) {
+                // TODO
+                console.log(err);
+            } else {
+                res.json(resp);
+            }
+        })
 });
 
 app.use('/api', router);

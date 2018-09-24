@@ -3,6 +3,9 @@ import {Card, Tabs, Tab, FontIcon, DatePicker, Toggle, GridList, GridTile, Selec
 import MyGraph from './MyGraph';
 import moment from "moment/moment";
 
+//var backendAddress = 'http://localhost:3100/api/';
+var backendAddress = 'http://137.204.57.136:3100/api/';
+
 var styles = {
     root: {
         display: 'flex',
@@ -225,13 +228,13 @@ export default class MyCard extends React.Component {
         console.log(this.state.queryNumber)
         switch(this.state.queryNumber){
             case 1:
-                query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfSelectedDate?crossRegion='+((this.state.crossRegion === true) ? 1 : 0)+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
+                query = backendAddress+this.state.dataType+'/query/avgOfSelectedDate?crossRegion='+((this.state.crossRegion === true) ? 1 : 0)+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
                 break;
             case 2:
-                query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfProviderOfSelectedDate?provider='+this.state.provider+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
+                query = backendAddress+this.state.dataType+'/query/avgOfProviderOfSelectedDate?provider='+this.state.provider+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
                 break;
             case 3:
-                query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfZoneOfSelectedDate?provider='+this.state.provider+'&zone='+this.state.zone+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
+                query = backendAddress+this.state.dataType+'/query/avgOfZoneOfSelectedDate?provider='+this.state.provider+'&zone='+this.state.zone+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
                 break;
             default:
 

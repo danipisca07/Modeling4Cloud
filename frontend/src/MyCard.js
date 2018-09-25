@@ -203,11 +203,17 @@ export default class MyCard extends React.Component {
                 for(let resource of res){
                     switch(this.state.queryNumber){
                         case 1:
+                            datasetsModified.label = "Comparison between providers based on average of all " + this.state.dataType;
                             labelsModified.push(resource.provider)
                             datasetsModified[0].data.push(resource.avg)
                             break;
                         case 2:
+                            datasetsModified.label = "Comparison between zones of provider " + this.state.provider + " based on average of all " + this.state.dataType;
+                            labelsModified.push(resource.provider + ":" +resource.from_zone + "->" + resource.to_zone)
+                            datasetsModified[0].data.push(resource.avg)
+                            break;
                         case 3:
+                            datasetsModified.label = "Comparison between zones against " + this.state.zone + " based on average of all " + this.state.dataType;
                             labelsModified.push(resource.provider + ":" +resource.from_zone + "->" + resource.to_zone)
                             datasetsModified[0].data.push(resource.avg)
                             break;

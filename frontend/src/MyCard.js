@@ -43,7 +43,6 @@ const horizontalBarHelper = {
     labels: [],
     datasets: [
         {
-            label: 'Comparison between providers based on average of all pings',
             borderColor: 'rgba(255,99,132,1)',
             borderWidth: 1,
             hoverBackgroundColor: 'rgba(255,99,132,0.4)',
@@ -147,6 +146,42 @@ const horizontalBarHelper = {
                 'rgba(153, 102, 255, 0.6)',
                 'rgba(255, 159, 64, 0.6)',
                 'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)'
             ],
             data: []
         }
@@ -293,17 +328,17 @@ export default class MyCard extends React.Component {
                 for(let resource of res){
                     switch(this.state.queryNumber){
                         case 1:
-                            datasetsModified.label = "Comparison between providers based on average of all " + this.state.dataType;
+                            graphDataModified.datasets.label = "Comparison between providers based on average of all " + this.state.dataType;
                             labelsModified.push(resource.provider)
                             datasetsModified[0].data.push(resource.avg)
                             break;
                         case 2:
-                            datasetsModified.label = "Comparison between zones of provider " + this.state.provider + " based on average of all " + this.state.dataType;
+                            graphDataModified.datasets.label = "Comparison between zones of provider " + this.state.provider + " based on average of all " + this.state.dataType;
                             labelsModified.push(resource.provider + ":" +resource.from_zone + "->" + resource.to_zone)
                             datasetsModified[0].data.push(resource.avg)
                             break;
                         case 3:
-                            datasetsModified.label = "Comparison between zones against " + this.state.zone + " based on average of all " + this.state.dataType;
+                            graphDataModified.datasets.label = "Comparison between zones against " + this.state.zone + " based on average of all " + this.state.dataType;
                             labelsModified.push(resource.provider + ":" +resource.from_zone + "->" + resource.to_zone)
                             datasetsModified[0].data.push(resource.avg)
                             break;

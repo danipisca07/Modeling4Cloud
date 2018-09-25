@@ -14,9 +14,10 @@ var styles = {
         margin: '0 auto'
     },
     gridList: {
-        width: 200,
-        height: 500,
+        width: 220,
+        height: 650,
         overflowY: 'auto',
+        verticalAlign: 'middle'
     },
 };
 
@@ -328,17 +329,13 @@ export default class MyCard extends React.Component {
                 for(let resource of res){
                     switch(this.state.queryNumber){
                         case 1:
-                            graphDataModified.datasets.label = "Comparison between providers based on average of all " + this.state.dataType;
+                            datasetsModified[0].label = "Comparison between providers based on average of all " + this.state.dataType;
                             labelsModified.push(resource.provider)
                             datasetsModified[0].data.push(resource.avg)
                             break;
                         case 2:
-                            graphDataModified.datasets.label = "Comparison between zones of provider " + this.state.provider + " based on average of all " + this.state.dataType;
-                            labelsModified.push(resource.provider + ":" +resource.from_zone + "->" + resource.to_zone)
-                            datasetsModified[0].data.push(resource.avg)
-                            break;
                         case 3:
-                            graphDataModified.datasets.label = "Comparison between zones against " + this.state.zone + " based on average of all " + this.state.dataType;
+                            datasetsModified[0].label = "Comparison between zones based on average of all " + this.state.dataType;
                             labelsModified.push(resource.provider + ":" +resource.from_zone + "->" + resource.to_zone)
                             datasetsModified[0].data.push(resource.avg)
                             break;
@@ -427,7 +424,7 @@ export default class MyCard extends React.Component {
     renderThird(){
         switch(this.state.queryNumber){
             case 1:
-                return(<Toggle label="Cross Region" defaultToggled={true} onToggle={this.handleCrossRegionChange}/>)
+                return(<Toggle label="Cross Region" style={{padding: '10px', width: '90%'}} defaultToggled={true} onToggle={this.handleCrossRegionChange}/>)
             case 2:
             case 3:
                 return(
@@ -463,7 +460,7 @@ export default class MyCard extends React.Component {
                         <div style={styles.root}>
                             <GridList
                                 cols={1}
-                                cellHeight={100}
+                                cellHeight={600}
                                 padding={1}
                                 style={styles.gridList}
                             >
@@ -477,8 +474,6 @@ export default class MyCard extends React.Component {
                                         <MenuItem value={'bandwidths'} primaryText="Bandwidth" />
 
                                     </SelectField>
-                                </GridTile>
-                                <GridTile>
                                     <SelectField
                                         floatingLabelText="Query"
                                         value={this.state.queryNumber}
@@ -488,19 +483,10 @@ export default class MyCard extends React.Component {
                                         <MenuItem value={2} primaryText="Single Provider" />
                                         <MenuItem value={3} primaryText="Single Zone" />
                                     </SelectField>
-                                </GridTile>
-                                <GridTile>
                                     {this.renderFirst()}
-                                </GridTile>
-                                <GridTile>
                                     {this.renderSecond()}
-                                </GridTile>
-                                <GridTile>
                                     {this.renderThird()}
-                                </GridTile>
-                                <GridTile>
                                     {this.renderFourth()}
-                                </GridTile>
                                 {/*<GridTile>
                                     <RadioButtonGroup name="graphType" defaultSelected="Pie" style={{display: 'inline'}} onChange={this.handleRadioButton}>
                                         <RadioButton value="Pie" label="Pie"/>
@@ -509,7 +495,6 @@ export default class MyCard extends React.Component {
                                         <RadioButton value="Line" label="Line"/>
                                     </RadioButtonGroup>
                                 </GridTile>*/}
-                                <GridTile>
                                     <RaisedButton label="Send" secondary={true} disabled={this.state.buttonDisabled} onClick={this.handleClick} style={{marginLeft: '27%'}}/>
                                 </GridTile>
                             </GridList>

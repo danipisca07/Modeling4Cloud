@@ -111,7 +111,7 @@ function precomputeAllPings(){
                 if(resp && resp.length > 0){
                     for(var i=0; i<resp.length; i++){
                         console.log("Precompute for " + resp[i]["_id"]["provider"] + resp[i]["_id"]["from_zone"] + resp[i]["_id"]["to_zone"]);
-                        Ping.aggregate()
+                        await Ping.aggregate()
                             .match({
                                 $and: [
                                     {provider: resp[i]["_id"]["provider"]},

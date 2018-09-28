@@ -700,6 +700,50 @@ router.route('/bandwidths/query/avgOfSelectedDate').get(async (req, res, next) =
         })
 });
 
+router.route('/bandwidths/query/avgOfProviderOfSelectedDate').get(async (req, res, next) => {
+    var start, end, provider;
+
+    start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
+    end = new Date(req.query.end + "T23:59:59-00:00");
+    provider = req.query.provider;
+    console.log("avgOfProviderOfSelectedDate: start:"+start+";end:"+end+";provider:"+provider);
+    Bandwidth.aggregate()
+        .match({$and: [{timestamp: {$gte: start, $lte: end}},{provider: provider}]})
+        .project({provider: "$provider", from_zone:"$from_zone", to_zone:"$to_zone",
+            bandwidth: "$bandwidth", transfer:"$transfer" })
+        .group({
+            _id: {
+                provider: "$provider",
+                from_zone: "$from_zone",
+                to_zone: "$to_zone"
+            },
+            avg: {$avg: "$bandwidth"},
+            count: {$sum: 1},
+            tot_transfer: {$sum: "$transfer"}
+        })
+        .addFields({
+            crossRegion: {$abs: {$cmp:["$_id.from_zone", "$_id.to_zone"]}},
+        })
+        .project({
+            "_id": 0,
+            "provider" : "$_id.provider",
+            "from_zone": "$_id.from_zone",
+            "to_zone": "$_id.to_zone",
+            "avg": "$avg",
+            "count": "$count",
+            "tot_transfer": "$tot_transfer",
+            crossRegion: "$crossRegion"
+        })
+        .exec(function (err, resp) {
+            if (err) {
+                // TODO
+                console.log(err);
+            } else {
+                res.json(resp);
+            }
+        })
+});
+
 router.route('/bandwidths/query/avgOfZoneOfSelectedDate').get(async (req, res, next) => {
     var start, end, provider, from_zone, to_zone;
 

@@ -3,6 +3,9 @@ import {Card, Tabs, Tab, FontIcon, DatePicker, Toggle, GridList, GridTile, Selec
 import MyGraph from './MyGraph';
 import moment from "moment/moment";
 
+//var backendAddress = 'http://localhost:3100/api/';
+var backendAddress = 'http://137.204.57.136:3100/api/';
+
 var styles = {
     root: {
         display: 'flex',
@@ -11,9 +14,10 @@ var styles = {
         margin: '0 auto'
     },
     gridList: {
-        width: 200,
-        height: 500,
+        width: 220,
+        height: 650,
         overflowY: 'auto',
+        verticalAlign: 'middle'
     },
 };
 
@@ -40,24 +44,149 @@ const horizontalBarHelper = {
     labels: [],
     datasets: [
         {
-            label: 'Comparison between providers based on average of all pings',
-            backgroundColor: 'rgba(255,99,132,0.2)',
             borderColor: 'rgba(255,99,132,1)',
             borderWidth: 1,
             hoverBackgroundColor: 'rgba(255,99,132,0.4)',
             hoverBorderColor: 'rgba(255,99,132,1)',
+            backgroundColor:[
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)'
+            ],
             data: []
         }
     ]
-}
-
-function getRandomColor() {
-    var letters = '0123456789ABCDEF'.split('');
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
 }
 
 const lineHelper = {
@@ -200,11 +329,13 @@ export default class MyCard extends React.Component {
                 for(let resource of res){
                     switch(this.state.queryNumber){
                         case 1:
+                            datasetsModified[0].label = "Comparison between providers based on average of all " + this.state.dataType;
                             labelsModified.push(resource.provider)
                             datasetsModified[0].data.push(resource.avg)
                             break;
                         case 2:
                         case 3:
+                            datasetsModified[0].label = "Comparison between zones based on average of all " + this.state.dataType;
                             labelsModified.push(resource.provider + ":" +resource.from_zone + "->" + resource.to_zone)
                             datasetsModified[0].data.push(resource.avg)
                             break;
@@ -225,13 +356,13 @@ export default class MyCard extends React.Component {
         console.log(this.state.queryNumber)
         switch(this.state.queryNumber){
             case 1:
-                query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfSelectedDate?crossRegion='+((this.state.crossRegion === true) ? 1 : 0)+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
+                query = backendAddress+this.state.dataType+'/query/avgOfSelectedDate?crossRegion='+((this.state.crossRegion === true) ? 1 : 0)+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
                 break;
             case 2:
-                query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfProviderOfSelectedDate?provider='+this.state.provider+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
+                query = backendAddress+this.state.dataType+'/query/avgOfProviderOfSelectedDate?provider='+this.state.provider+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
                 break;
             case 3:
-                query = 'http://localhost:3100/api/'+this.state.dataType+'/query/avgOfZoneOfSelectedDate?provider='+this.state.provider+'&zone='+this.state.zone+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
+                query = backendAddress+this.state.dataType+'/query/avgOfZoneOfSelectedDate?provider='+this.state.provider+'&zone='+this.state.zone+'&start='+moment(this.state.start).format('YYYY-MM-DD')+'&end='+moment(this.state.end).format('YYYY-MM-DD')
                 break;
             default:
 
@@ -293,7 +424,7 @@ export default class MyCard extends React.Component {
     renderThird(){
         switch(this.state.queryNumber){
             case 1:
-                return(<Toggle label="Cross Region" defaultToggled={true} onToggle={this.handleCrossRegionChange}/>)
+                return(<Toggle label="Cross Region" style={{padding: '10px', width: '90%'}} defaultToggled={true} onToggle={this.handleCrossRegionChange}/>)
             case 2:
             case 3:
                 return(
@@ -329,7 +460,7 @@ export default class MyCard extends React.Component {
                         <div style={styles.root}>
                             <GridList
                                 cols={1}
-                                cellHeight={100}
+                                cellHeight={600}
                                 padding={1}
                                 style={styles.gridList}
                             >
@@ -343,8 +474,6 @@ export default class MyCard extends React.Component {
                                         <MenuItem value={'bandwidths'} primaryText="Bandwidth" />
 
                                     </SelectField>
-                                </GridTile>
-                                <GridTile>
                                     <SelectField
                                         floatingLabelText="Query"
                                         value={this.state.queryNumber}
@@ -354,19 +483,10 @@ export default class MyCard extends React.Component {
                                         <MenuItem value={2} primaryText="Single Provider" />
                                         <MenuItem value={3} primaryText="Single Zone" />
                                     </SelectField>
-                                </GridTile>
-                                <GridTile>
                                     {this.renderFirst()}
-                                </GridTile>
-                                <GridTile>
                                     {this.renderSecond()}
-                                </GridTile>
-                                <GridTile>
                                     {this.renderThird()}
-                                </GridTile>
-                                <GridTile>
                                     {this.renderFourth()}
-                                </GridTile>
                                 {/*<GridTile>
                                     <RadioButtonGroup name="graphType" defaultSelected="Pie" style={{display: 'inline'}} onChange={this.handleRadioButton}>
                                         <RadioButton value="Pie" label="Pie"/>
@@ -375,7 +495,6 @@ export default class MyCard extends React.Component {
                                         <RadioButton value="Line" label="Line"/>
                                     </RadioButtonGroup>
                                 </GridTile>*/}
-                                <GridTile>
                                     <RaisedButton label="Send" secondary={true} disabled={this.state.buttonDisabled} onClick={this.handleClick} style={{marginLeft: '27%'}}/>
                                 </GridTile>
                             </GridList>

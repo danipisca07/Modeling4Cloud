@@ -113,9 +113,11 @@ function precomputeAllPings(){
                         console.log("Precompute for " + resp[i]["_id"]["provider"] + resp[i]["_id"]["from_zone"] + resp[i]["_id"]["to_zone"]);
                         Ping.aggregate()
                             .match({
-                                provider: resp[i]["_id"]["provider"],
-                                from_zone: resp[i]["_id"]["from_zone"],
-                                to_zone: resp[i]["_id"]["to_zone"]
+                                $and: [
+                                    {provider: resp[i]["_id"]["provider"]},
+                                    {from_zone: resp[i]["_id"]["from_zone"]},
+                                    {to_zone: resp[i]["_id"]["to_zone"]}
+                                ]
                             })
                             .group({
                                 _id: {

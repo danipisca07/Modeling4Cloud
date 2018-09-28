@@ -24,8 +24,6 @@ app.use(paginate.middleware(100, 200));
 router.use(bodyParser.urlencoded({extended:true}));
 router.use(bodyParser.json());
 
-// TODO remove and use cors module?
-// To prevent errors from Cross Origin Resource Sharing, we will set our headers to allow CORS with middleware like this
 app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -99,14 +97,11 @@ function precomputeAllPings(){
     console.time("precomputeAllPings");
     Ping.aggregate()
         .group({
-            _id: {
-                provider: "$provider",
-                from_zone: "$from_zone",
-                to_zone: "$to_zone",
-                day: {$dateToString: {format: "%Y-%m-%d", date: "$timestamp"}}
-            },
-            avg: {$avg: "$time"},
-            count: {$sum: 1}
+            _id: {     
+                provider: "$provider",                 
+                from_zone: "$from_zone",                 
+                to_zone: "$to_zone" 
+            }  
         })
         .exec(async function (err,resp) {
             if (err) {
@@ -115,10 +110,36 @@ function precomputeAllPings(){
             } else {
                 if(resp && resp.length > 0){
                     for(var i=0; i<resp.length; i++){
-                        await updateDayAvg(resp[i]);
+                        console.log(resp[i]);
+                        Ping.aggregate()
+                            .match({
+                                provider: resp[i]["_id.provider"]
+                            })
+                            .group({
+                                _id: {
+                                    provider: "$provider",
+                                    from_zone: "$from_zone",
+                                    to_zone: "$to_zone",
+                                    day: {$dateToString: {format: "%Y-%m-%d", date: "$timestamp"}}
+                                },
+                                avg: {$avg: "$time"},
+                                count: {$sum: 1}
+                            })
+                            .exec(async function (err,resp) {
+                                if (err) {
+                                    // TODO
+                                    console.log(err);
+                                } else {
+                                    if(resp && resp.length > 0){
+                                        for(var i=0; i<resp.length; i++){
+                                            await updateDayAvg(resp[i]);
+                                        }
+                                    }
+                                    console.timeEnd("precomputeAllPings");
+                                }
+                            });
                     }
                 }
-                console.timeEnd("precomputeAllPings");
             }
         });
 }

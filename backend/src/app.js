@@ -24,8 +24,6 @@ app.use(paginate.middleware(100, 200));
 router.use(bodyParser.urlencoded({extended:true}));
 router.use(bodyParser.json());
 
-// TODO remove and use cors module?
-// To prevent errors from Cross Origin Resource Sharing, we will set our headers to allow CORS with middleware like this
 app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -48,7 +46,7 @@ router.route('/upload').post(upload.single('data'), function (req, res) {
         res.status(200).send("File registered\n");
         console.log("File uploaded(Ping):" + req.file.originalname);
         const { exec } = require('child_process'); // TODO secrets?
-        exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' |  sed \'/,,/d\' | sed \'/,SA,/d\' | sed \'/,RA,/d\' | mongoimport -h localhost:27017 -d pings -c pings --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),icmp_seq.int32\(\),ttl.int32\(\),time.double\(\),timestamp.date\(2006-01-02T15:04:05-00:00\)"', (err, stdout, stderr) => {
+        exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' |  sed \'/,,/d\' | sed \'/,SA,/d\' | sed \'/,RA,/d\' | mongoimport -h localhost:27017 -u nodeUser -p modelingforcloudnode -d pings -c pings --authenticationDatabase admin --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),icmp_seq.int32\(\),ttl.int32\(\),time.double\(\),timestamp.date\(2006-01-02T15:04:05-00:00\)"', (err, stdout, stderr) => {
         //        exec('tail -n +2 '+ UPLOAD_PATH+req.file.originalname +' | mongoimport -h 10.0.0.14:27017 -d pings -c pings -u albertobagnacani -p modeling4cloud --type csv --columnsHaveTypes --fields "provider.string\(\),from_zone.string\(\),to_zone.string\(\),from_host.string\(\),to_host.string\(\),icmp_seq.int32\(\),ttl.int32\(\),time.double\(\),timestamp.date\(2006-01-02T15:04:05-00:00\)"', (err, stdout, stderr) => {
             if (err) {
                 // TODO
@@ -99,14 +97,11 @@ function precomputeAllPings(){
     console.time("precomputeAllPings");
     Ping.aggregate()
         .group({
-            _id: {
-                provider: "$provider",
-                from_zone: "$from_zone",
-                to_zone: "$to_zone",
-                day: {$dateToString: {format: "%Y-%m-%d", date: "$timestamp"}}
-            },
-            avg: {$avg: "$time"},
-            count: {$sum: 1}
+            _id: {     
+                provider: "$provider",                 
+                from_zone: "$from_zone",                 
+                to_zone: "$to_zone" 
+            }  
         })
         .exec(async function (err,resp) {
             if (err) {
@@ -115,10 +110,40 @@ function precomputeAllPings(){
             } else {
                 if(resp && resp.length > 0){
                     for(var i=0; i<resp.length; i++){
-                        await updateDayAvg(resp[i]);
+                        console.log("Precompute for " + resp[i]["_id"]["provider"] + resp[i]["_id"]["from_zone"] + resp[i]["_id"]["to_zone"]);
+                        await Ping.aggregate()
+                            .match({
+                                $and: [
+                                    {provider: resp[i]["_id"]["provider"]},
+                                    {from_zone: resp[i]["_id"]["from_zone"]},
+                                    {to_zone: resp[i]["_id"]["to_zone"]}
+                                ]
+                            })
+                            .group({
+                                _id: {
+                                    provider: "$provider",
+                                    from_zone: "$from_zone",
+                                    to_zone: "$to_zone",
+                                    day: {$dateToString: {format: "%Y-%m-%d", date: "$timestamp"}}
+                                },
+                                avg: {$avg: "$time"},
+                                count: {$sum: 1}
+                            })
+                            .exec(async function (err,resp) {
+                                if (err) {
+                                    // TODO
+                                    console.log(err);
+                                } else {
+                                    if(resp && resp.length > 0){
+                                        for(var i=0; i<resp.length; i++){
+                                            await updateDayAvg(resp[i]);
+                                        }
+                                    }
+                                    console.timeEnd("precomputeAllPings");
+                                }
+                            });
                     }
                 }
-                console.timeEnd("precomputeAllPings");
             }
         });
 }

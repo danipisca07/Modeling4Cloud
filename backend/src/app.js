@@ -437,7 +437,6 @@ router.route('/pings/query/avgOfZoneOfSelectedDate').get(async (req, res, next) 
 
 router.route('/pings/query/avgOfProviderOfSelectedDate').get(async (req, res, next) => {
     var start, end, provider, zone;
-
     start = new Date(req.query.start + "T00:00:00-00:00"); //YYYY-MM-DD
     end = new Date(req.query.end + "T23:59:59-00:00");
     provider = req.query.provider;
@@ -661,11 +660,16 @@ router.route('/bandwidths/query/avgOfSelectedDate').get(async (req, res, next) =
             },
             avg: { $avg: "$bandwidth" },
             count: { $sum: 1 }})
+        .group({
+            _id: {
+                provider: "$provider"
+            },
+            avg: {$avg: "$avg"},
+            count: { $sum: 1 }})
+        })
         .project({
             _id:0,
             provider: "$_id.provider",
-            from_zone: "$_id.from_zone",
-            to_zone: "$_id.to_zone",
             avg: "$avg",
             count: "$count"
         })

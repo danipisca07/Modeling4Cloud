@@ -23,7 +23,7 @@
   },
   "description": "ModelingMyCloud",
   "devDependencies": {
-    "foreman": "^2.0.0"
+    "foreman": "^3.0.1"
   },
   "author": "Alberto Bagnacani",
   "license": "ISC"
